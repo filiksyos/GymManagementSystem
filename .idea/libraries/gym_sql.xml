@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="gym.sql">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/database/gym.sql.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
