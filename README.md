@@ -56,11 +56,90 @@ The system uses a relational database with the following main tables:
 6. Payments
 7. Attendance
 
-[Add database schema diagram here]
-
 ## UML Class Diagram
 
-[Add UML class diagram here]
+```mermaid
+classDiagram
+    class GymManagementSystem {
+        -main_form: AnchorPane
+        +start(Stage stage)
+        +main(String[] args)
+    }
+
+    class dashboardController {
+        -main_form: AnchorPane
+        -dashboard_form: AnchorPane
+        -coaches_form: AnchorPane
+        -members_form: AnchorPane
+        -payment_Form: AnchorPane
+        +initialize(URL location, ResourceBundle resources)
+        +switchForm(ActionEvent event)
+        +displayUsername()
+        +dashboardNM()
+        +dashboardTC()
+        +dashboardTI()
+        +dashboardChart()
+    }
+
+    class memberData {
+        -id: Integer
+        -memberId: String
+        -name: String
+        -address: String
+        -phoneNum: Integer
+        -gender: String
+        -schedule: String
+        -startDate: Date
+        -endDate: Date
+        -price: Double
+        -status: String
+        +getMemberId(): String
+        +getName(): String
+        +getAddress(): String
+        +getPhoneNum(): Integer
+        +getGender(): String
+        +getSchedule(): String
+        +getStartDate(): Date
+        +getEndDate(): Date
+        +getPrice(): Double
+        +getStatus(): String
+    }
+
+    class coachData {
+        -id: Integer
+        -coachId: String
+        -name: String
+        -address: String
+        -gender: String
+        -phoneNum: Integer
+        -status: String
+        +getCoachId(): String
+        +getName(): String
+        +getAddress(): String
+        +getGender(): String
+        +getPhoneNum(): Integer
+        +getStatus(): String
+    }
+
+    class database {
+        +connectDb(): Connection
+    }
+
+    class FXMLDocumentController {
+        -username: String
+        -password: String
+        +loginBtn()
+        +registerBtn()
+        +closeBtn()
+        +minimizeBtn()
+    }
+
+    GymManagementSystem --> dashboardController
+    dashboardController --> memberData
+    dashboardController --> coachData
+    dashboardController --> database
+    FXMLDocumentController --> database
+```
 
 ## Installation and Setup
 
