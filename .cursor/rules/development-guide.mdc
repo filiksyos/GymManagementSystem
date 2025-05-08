@@ -1,0 +1,81 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Development Guide
+
+## Setup and Installation
+
+### Prerequisites
+- Java Development Kit (JDK) 8 or higher
+- JavaFX
+- MySQL Server
+- NetBeans IDE (recommended)
+
+### Database Setup
+1. Install MySQL Server
+2. Create a new database named "gym"
+3. Import the database schema using [gym.sql](mdc:database/gym.sql)
+4. Update database connection details in [database.java](mdc:src/gymmanagementsystem/database.java) if needed
+
+### Project Setup
+1. Clone the repository
+2. Open the project in NetBeans IDE
+3. Resolve dependencies
+4. Build and run the project
+
+## Development Workflow
+
+### Authentication System
+The login system is implemented in [FXMLDocumentController.java](mdc:src/gymmanagementsystem/FXMLDocumentController.java) and connects to the 'admin' table in the database for user authentication.
+
+### Adding New Features
+1. For UI changes:
+   - Modify the appropriate FXML file ([FXMLDocument.fxml](mdc:src/gymmanagementsystem/FXMLDocument.fxml) or [dashboard.fxml](mdc:src/gymmanagementsystem/dashboard.fxml))
+   - Update corresponding CSS files as needed
+
+2. For database modifications:
+   - Update the SQL schema in [gym.sql](mdc:database/gym.sql)
+   - Create new data model classes if necessary
+   - Implement CRUD operations in the appropriate controller
+
+3. For new entities:
+   - Create a new data model class following the pattern in [memberData.java](mdc:src/gymmanagementsystem/memberData.java)
+   - Add a new tab in [dashboard.fxml](mdc:src/gymmanagementsystem/dashboard.fxml)
+   - Implement controller methods in [dashboardController.java](mdc:src/gymmanagementsystem/dashboardController.java)
+
+### Styling Guidelines
+- Follow the existing styling in [loginDesign.css](mdc:src/gymmanagementsystem/loginDesign.css) and [dashboardDesign.css](mdc:src/gymmanagementsystem/dashboardDesign.css)
+- Use consistent naming conventions for CSS classes
+
+## Code Conventions
+
+### Naming Conventions
+- Class names: PascalCase (e.g., GymManagementSystem, MemberData)
+- Method names: camelCase (e.g., connectDb, loginBtn)
+- Variable names: camelCase (e.g., userName, phoneNum)
+- Constants: UPPER_CASE (when applicable)
+
+### Exception Handling
+- Always use try-catch blocks for database operations
+- Provide meaningful error messages to the user
+- Log errors for debugging purposes
+
+### Documentation
+- Include comments for complex logic
+- Document public methods and their parameters
+- Update README.md with any significant changes
+
+## Testing
+
+### Manual Testing
+Test the following scenarios:
+1. User authentication (valid and invalid credentials)
+2. Member CRUD operations
+3. Coach CRUD operations
+4. Dashboard statistics
+5. Navigation between screens
+
+### Known Issues
+- Any known bugs or limitations should be documented in README.md

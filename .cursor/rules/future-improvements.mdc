@@ -1,0 +1,87 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Future Improvements
+
+## Requirements Gap Analysis
+
+Based on the assignment requirements, the following areas need improvement or implementation:
+
+### 1. UML Class Diagram
+- **Current State**: Basic UML diagram in README.md
+- **Needed**: More comprehensive UML class diagram showing all classes, relationships, attributes, and methods
+- **Implementation Path**: Use a UML modeling tool to create and export a detailed diagram
+
+### 2. Enhanced Database Design
+- **Current State**: Three tables (admin, member, coach)
+- **Requirement**: Minimum of five tables with defined relationships
+- **Missing Tables**:
+  - Equipment inventory table
+  - Schedule/class management table
+  - Payment/transaction history table
+- **Implementation Path**: Expand [gym.sql](mdc:database/gym.sql) and create corresponding data models
+
+### 3. Additional User Interfaces
+- **Current State**: Login screen and dashboard with member/coach/payment management
+- **Requirement**: At least eight distinct user interfaces
+- **Missing Interfaces**:
+  - Equipment management interface
+  - Detailed scheduling/class management
+  - Reports and analytics
+  - User profile/settings
+  - Admin management panel
+- **Implementation Path**: Create new tabs in [dashboard.fxml](mdc:src/gymmanagementsystem/dashboard.fxml) or separate FXML files
+
+### 4. Enhanced Exception Handling
+- **Current State**: Basic try-catch blocks for database operations
+- **Needed**: More comprehensive exception handling with:
+  - Custom exception classes
+  - User-friendly error messages
+  - Logging mechanisms
+  - Recovery procedures
+- **Implementation Path**: Refactor error handling in controllers
+
+### 5. Complete Operational Documentation
+- **Current State**: Basic README
+- **Requirement**: Comprehensive operational document detailing system functionality
+- **Missing Documentation**:
+  - Complete UML diagrams
+  - Database relationship design
+  - Comprehensive user manual
+  - Technical documentation
+- **Implementation Path**: Create detailed documentation in appropriate formats
+
+### 6. Enhanced Authentication System
+- **Current State**: Basic username/password authentication
+- **Needed**: More secure authentication with:
+  - Password hashing
+  - Role-based access control
+  - Session management
+- **Implementation Path**: Enhance [FXMLDocumentController.java](mdc:src/gymmanagementsystem/FXMLDocumentController.java)
+
+## Priority Improvements
+
+1. **Database Expansion (High Priority)**
+   - Add equipment table to track gym equipment inventory, maintenance status
+   - Add schedule table to manage classes and trainer assignments
+   - Add payment history table for financial tracking
+
+2. **Additional UI Components (High Priority)**
+   - Equipment management interface with CRUD operations
+   - Scheduling interface for class management
+   - Reports and analytics dashboard
+
+3. **Security Enhancements (Medium Priority)**
+   - Implement password hashing in [FXMLDocumentController.java](mdc:src/gymmanagementsystem/FXMLDocumentController.java)
+   - Add role-based access control for different user types
+
+4. **Documentation (Medium Priority)**
+   - Create comprehensive UML diagrams
+   - Document database relationships
+
+5. **Testing and Validation (Medium Priority)**
+   - Implement input validation for all forms
+   - Create unit tests for core functionality
+

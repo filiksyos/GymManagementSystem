@@ -1,0 +1,108 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Database Schema
+
+## Overview
+The Gym Management System uses a MySQL database with tables designed to manage gym members, coaches, and administrative users. The database schema is defined in [gym.sql](mdc:database/gym.sql).
+
+## Tables
+
+### Admin Table
+Stores authentication information for system administrators.
+
+```sql
+CREATE TABLE `admin` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(100) NOT NULL,
+  `username` varchar(100) NOT NULL,
+  `password` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`)
+);
+```
+
+### Member Table
+Tracks gym members and their membership details.
+
+```sql
+CREATE TABLE `member` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `memberId` varchar(100) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `address` varchar(500) NOT NULL,
+  `phoneNum` int(100) NOT NULL,
+  `gender` varchar(100) NOT NULL,
+  `schedule` varchar(100) NOT NULL,
+  `startDate` date DEFAULT NULL,
+  `endDate` date DEFAULT NULL,
+  `price` double NOT NULL,
+  `status` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`)
+);
+```
+
+### Coach Table
+Manages information about gym coaches.
+
+```sql
+CREATE TABLE `coach` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `coachId` varchar(100) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `address` varchar(500) NOT NULL,
+  `gender` varchar(100) NOT NULL,
+  `phoneNum` int(100) NOT NULL,
+  `status` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`)
+);
+```
+
+## Relationships
+The database schema supports the following relationships:
+- Members have schedules that can be managed by coaches
+- Administrators manage members and coaches
+- The system tracks membership status and payment information
+
+## Database Operations
+Database operations are managed through the [database.java](mdc:src/gymmanagementsystem/database.java) class, which provides a connection to the MySQL database.
+
+```java
+// Example connection method from database.java
+public Connection connectDb() {
+    try {
+        Class.forName("com.mysql.jdbc.Driver");
+        Connection connect = DriverManager.getConnection("jdbc:mysql://localhost/gym", "root", "");
+        return connect;
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return null;
+}
+```
+
+## CRUD Implementation
+The [dashboardController.java](mdc:src/gymmanagementsystem/dashboardController.java) implements CRUD operations for both members and coaches:
+
+### Create
+- Adding new members: `addMemberBtn()`
+- Adding new coaches: `addCoachBtn()`
+
+### Read
+- Retrieving member data: `memberShowListData()`
+- Retrieving coach data: `coachShowListData()`
+
+### Update
+- Updating member information: `updateMemberBtn()`
+- Updating coach information: `updateCoachBtn()`
+
+### Delete
+- Removing members: `deleteMemberBtn()`
+- Removing coaches: `deleteCoachBtn()`
+
+## Data Models
+The database tables are represented in the application by corresponding data model classes:
+- [memberData.java](mdc:src/gymmanagementsystem/memberData.java)
+- [coachData.java](mdc:src/gymmanagementsystem/coachData.java)
+

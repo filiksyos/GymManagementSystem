@@ -1,0 +1,156 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Implementation Plan
+
+This plan outlines the steps needed to complete the project according to the assignment requirements.
+
+## Phase 1: Database Expansion
+
+### Create Equipment Table
+```sql
+CREATE TABLE `equipment` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `equipmentId` varchar(100) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `type` varchar(100) NOT NULL,
+  `purchaseDate` date DEFAULT NULL,
+  `lastMaintenance` date DEFAULT NULL,
+  `nextMaintenance` date DEFAULT NULL,
+  `status` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`)
+);
+```
+
+### Create Schedule Table
+```sql
+CREATE TABLE `schedule` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `scheduleId` varchar(100) NOT NULL,
+  `className` varchar(100) NOT NULL,
+  `coachId` varchar(100) NOT NULL,
+  `dayOfWeek` varchar(20) NOT NULL,
+  `startTime` time NOT NULL,
+  `endTime` time NOT NULL,
+  `maxCapacity` int(11) NOT NULL,
+  `currentEnrollment` int(11) DEFAULT 0,
+  `status` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`coachId`) REFERENCES `coach`(`coachId`)
+);
+```
+
+### Create Payment Table
+```sql
+CREATE TABLE `payment` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `paymentId` varchar(100) NOT NULL,
+  `memberId` varchar(100) NOT NULL,
+  `amount` double NOT NULL,
+  `paymentDate` date NOT NULL,
+  `paymentMethod` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`memberId`) REFERENCES `member`(`memberId`)
+);
+```
+
+## Phase 2: Data Models
+
+### Create EquipmentData Class
+Create a new file [equipmentData.java](mdc:src/gymmanagementsystem/equipmentData.java) following the pattern of existing data models.
+
+### Create ScheduleData Class
+Create a new file [scheduleData.java](mdc:src/gymmanagementsystem/scheduleData.java) following the pattern of existing data models.
+
+### Create PaymentData Class
+Create a new file [paymentData.java](mdc:src/gymmanagementsystem/paymentData.java) following the pattern of existing data models.
+
+## Phase 3: UI Expansion
+
+### Create Equipment Management UI
+Add a new tab in [dashboard.fxml](mdc:src/gymmanagementsystem/dashboard.fxml) for equipment management:
+- Equipment information form
+- Equipment list table
+- CRUD operation buttons
+- Search and filter functionality
+
+### Create Schedule Management UI
+Add a new tab in [dashboard.fxml](mdc:src/gymmanagementsystem/dashboard.fxml) for schedule management:
+- Class scheduling form
+- Schedule calendar/table view
+- Enrollment tracking
+- Coach assignment
+
+### Create Reports UI
+Add a new tab in [dashboard.fxml](mdc:src/gymmanagementsystem/dashboard.fxml) for reports and analytics:
+- Membership statistics
+- Financial reports
+- Attendance tracking
+- Equipment usage metrics
+
+### Create Admin Management UI
+Add a new tab in [dashboard.fxml](mdc:src/gymmanagementsystem/dashboard.fxml) for admin management:
+- User account management
+- Role assignment
+- System settings
+
+## Phase 4: Controller Enhancements
+
+### Update DashboardController
+Add methods in [dashboardController.java](mdc:src/gymmanagementsystem/dashboardController.java) to handle:
+- Equipment CRUD operations
+- Schedule management
+- Payment processing
+- Reporting functions
+
+### Enhance Authentication
+Update [FXMLDocumentController.java](mdc:src/gymmanagementsystem/FXMLDocumentController.java) to include:
+- Password hashing (using a library like BCrypt)
+- Role-based access control
+- Session management
+
+## Phase 5: Exception Handling
+
+### Create Custom Exceptions
+Create new files for custom exceptions:
+- `DatabaseConnectionException.java`
+- `AuthenticationException.java`
+- `ValidationException.java`
+
+### Implement Comprehensive Error Handling
+Update all controllers to use the new exception classes with:
+- Specific error messages
+- Logging mechanisms
+- Recovery procedures where appropriate
+
+## Phase 6: Documentation
+
+### Complete UML Class Diagram
+Create a comprehensive UML diagram showing:
+- All classes with attributes and methods
+- Relationships between classes
+- Inheritance and interface implementation
+
+### Database Relationship Diagram
+Create an ER diagram showing:
+- All database tables
+- Primary and foreign key relationships
+- Cardinality indicators
+
+### User Manual
+Create a comprehensive user manual with:
+- System overview
+- Feature descriptions
+- Step-by-step usage instructions
+- Troubleshooting guide
+
+### Technical Documentation
+Update technical documentation with:
+- System architecture details
+- Design patterns used
+- Third-party libraries
+- Development and deployment guidelines
+

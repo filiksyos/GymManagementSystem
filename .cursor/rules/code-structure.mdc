@@ -1,0 +1,56 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Code Structure and Organization
+
+## Core Components
+
+### Main Application
+- [GymManagementSystem.java](mdc:src/gymmanagementsystem/GymManagementSystem.java): Entry point of the application that launches the JavaFX UI
+
+### Authentication
+- [FXMLDocumentController.java](mdc:src/gymmanagementsystem/FXMLDocumentController.java): Handles login functionality and user authentication
+- [FXMLDocument.fxml](mdc:src/gymmanagementsystem/FXMLDocument.fxml): Login screen UI design
+
+### Dashboard
+- [dashboardController.java](mdc:src/gymmanagementsystem/dashboardController.java): Main controller for the dashboard and its sub-components
+- [dashboard.fxml](mdc:src/gymmanagementsystem/dashboard.fxml): Dashboard UI design with tabs for different functionalities
+
+### Data Models
+- [memberData.java](mdc:src/gymmanagementsystem/memberData.java): Member entity model with getters and setters
+- [coachData.java](mdc:src/gymmanagementsystem/coachData.java): Coach entity model with getters and setters
+- [data.java](mdc:src/gymmanagementsystem/data.java): General data handling utilities
+
+### Database
+- [database.java](mdc:src/gymmanagementsystem/database.java): Database connection manager
+- [gym.sql](mdc:database/gym.sql): SQL schema for database creation and initial data
+
+### Styling
+- [loginDesign.css](mdc:src/gymmanagementsystem/loginDesign.css): CSS styling for the login screen
+- [dashboardDesign.css](mdc:src/gymmanagementsystem/dashboardDesign.css): CSS styling for the dashboard
+
+## Key Design Patterns
+
+### MVC Pattern
+The application follows the Model-View-Controller pattern:
+- **Models**: memberData, coachData
+- **Views**: FXML files (FXMLDocument.fxml, dashboard.fxml)
+- **Controllers**: FXMLDocumentController, dashboardController
+
+### DAO Pattern
+Database operations are abstracted through the database.java class, which provides connection management and query execution capabilities.
+
+## CRUD Operations
+The dashboardController.java implements CRUD operations for both members and coaches:
+- **Create**: Add new members/coaches to the system
+- **Read**: View and filter existing members/coaches
+- **Update**: Modify information for existing members/coaches
+- **Delete**: Remove members/coaches from the system
+
+## Exception Handling
+Exception handling is implemented throughout the application for:
+- Database connection issues
+- Input validation
+- Authentication errors
