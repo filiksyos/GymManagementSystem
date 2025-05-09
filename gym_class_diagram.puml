@@ -1,0 +1,466 @@
+@startuml Gym Management System
+
+' Color definitions for better readability
+!define MainEntityColor #e0f7fa
+!define DataModelColor #b3e5fc
+!define ControllerColor #bbdefb
+!define UtilityColor #dcedc8
+!define ReportColor #c8e6c9
+!define RelationshipColor #9fa8da
+
+' Title
+title Gym Management System - Class Diagram
+
+' Main application class
+class GymManagementSystem << (A,#ffeb3b) Application >> #f8bbd0 {
+  - x: double
+  - y: double
+  + start(stage: Stage): void
+  + main(args: String[]): void
+}
+
+' Core Data Models
+class data << (D,#ffeb3b) Static >> #f3e5f5 {
+  + {static} username: String
+  + {static} userRole: String
+  + {static} userId: Integer
+  + {static} userFullName: String
+  + {static} hasPermission(permission: String): boolean
+}
+
+class database << (U,#ffeb3b) Utility >> {
+  + {static} connectDb(): Connection
+}
+
+' Data Model classes
+class memberData << (E,#ffeb3b) Entity >> #e0f7fa {
+  - id: Integer
+  - memberId: String
+  - name: String
+  - address: String
+  - phoneNum: Integer
+  - gender: String
+  - schedule: String
+  - startDate: Date
+  - endDate: Date
+  - status: String
+  - price: Double
+  + getid(): Integer
+  + getMemberId(): String
+  + getName(): String
+  + getAddress(): String
+  + getPhoneNum(): Integer
+  + getGender(): String
+  + getSchedule(): String
+  + getStartDate(): Date
+  + getEndDate(): Date
+  + getPrice(): Double
+  + getStatus(): String
+}
+
+class coachData << (E,#ffeb3b) Entity >> #e0f7fa {
+  - id: Integer
+  - coachId: String
+  - name: String
+  - address: String
+  - gender: String
+  - phoneNum: Integer
+  - status: String
+  + getId(): Integer
+  + getCoachId(): String
+  + getName(): String
+  + getAddress(): String
+  + getGender(): String
+  + getPhoneNum(): Integer
+  + getStatus(): String
+}
+
+class equipmentData << (E,#ffeb3b) Entity >> #b3e5fc {
+  - id: Integer
+  - equipmentId: String
+  - name: String
+  - type: String
+  - purchaseDate: Date
+  - lastMaintenance: Date
+  - nextMaintenance: Date
+  - status: String
+  + getId(): Integer
+  + getEquipmentId(): String
+  + getName(): String
+  + getType(): String
+  + getPurchaseDate(): Date
+  + getLastMaintenance(): Date
+  + getNextMaintenance(): Date
+  + getStatus(): String
+  + setId(id: Integer): void
+  + setEquipmentId(equipmentId: String): void
+  + setName(name: String): void
+  + setType(type: String): void
+  + setPurchaseDate(purchaseDate: Date): void
+  + setLastMaintenance(lastMaintenance: Date): void
+  + setNextMaintenance(nextMaintenance: Date): void
+  + setStatus(status: String): void
+  + toString(): String
+}
+
+class scheduleData << (E,#ffeb3b) Entity >> #b3e5fc {
+  - id: Integer
+  - scheduleId: String
+  - className: String
+  - coachId: String
+  - dayOfWeek: String
+  - startTime: Time
+  - endTime: Time
+  - maxCapacity: Integer
+  - currentEnrollment: Integer
+  - status: String
+  + getId(): Integer
+  + getScheduleId(): String
+  + getClassName(): String
+  + getCoachId(): String
+  + getDayOfWeek(): String
+  + getStartTime(): Time
+  + getEndTime(): Time
+  + getMaxCapacity(): Integer
+  + getCurrentEnrollment(): Integer
+  + getStatus(): String
+  + setId(id: Integer): void
+  + setScheduleId(scheduleId: String): void
+  + setClassName(className: String): void
+  + setCoachId(coachId: String): void
+  + setDayOfWeek(dayOfWeek: String): void
+  + setStartTime(startTime: Time): void
+  + setEndTime(endTime: Time): void
+  + setMaxCapacity(maxCapacity: Integer): void
+  + setCurrentEnrollment(currentEnrollment: Integer): void
+  + setStatus(status: String): void
+  + isFull(): boolean
+  + getAvailableSlots(): int
+  + getTimeRange(): String
+  + toString(): String
+}
+
+class paymentData << (E,#ffeb3b) Entity >> #b3e5fc {
+  - id: Integer
+  - paymentId: String
+  - memberId: String
+  - amount: Double
+  - paymentDate: Date
+  - paymentMethod: String
+  - description: String
+  + getId(): Integer
+  + getPaymentId(): String
+  + getMemberId(): String
+  + getAmount(): Double
+  + getPaymentDate(): Date
+  + getPaymentMethod(): String
+  + getDescription(): String
+  + setId(id: Integer): void
+  + setPaymentId(paymentId: String): void
+  + setMemberId(memberId: String): void
+  + setAmount(amount: Double): void
+  + setPaymentDate(paymentDate: Date): void
+  + setPaymentMethod(paymentMethod: String): void
+  + setDescription(description: String): void
+  + getFormattedAmount(): String
+  + toString(): String
+}
+
+class adminData << (E,#ffeb3b) Entity >> #e0f7fa {
+  - id: Integer
+  - username: String
+  - password: String
+  - fullName: String
+  - email: String
+  - role: String
+  - status: String
+  - lastLogin: Timestamp
+  - createdBy: String
+  - createdAt: Timestamp
+  + getId(): Integer
+  + getUsername(): String
+  + getFullName(): String
+  + getEmail(): String
+  + getRole(): String
+  + getStatus(): String
+  + getLastLogin(): Timestamp
+  + getCreatedBy(): String
+  + getCreatedAt(): Timestamp
+  + setId(id: Integer): void
+  + setUsername(username: String): void
+  + setPassword(password: String): void
+  + setFullName(fullName: String): void
+  + setEmail(email: String): void
+  + setRole(role: String): void
+  + setStatus(status: String): void
+  + setLastLogin(lastLogin: Timestamp): void
+  + setCreatedBy(createdBy: String): void
+  + setCreatedAt(createdAt: Timestamp): void
+  + isActive(): boolean
+  + isSuperAdmin(): boolean
+  + toString(): String
+}
+
+class roleData << (E,#ffeb3b) Entity >> #e0f7fa {
+  - id: Integer
+  - roleName: String
+  - description: String
+  - permissions: String
+  + getId(): Integer
+  + getRoleName(): String
+  + getDescription(): String
+  + getPermissions(): String
+  + setId(id: Integer): void
+  + setRoleName(roleName: String): void
+  + setDescription(description: String): void
+  + setPermissions(permissions: String): void
+  + hasPermission(permission: String): boolean
+  + addPermission(permission: String): void
+  + removePermission(permission: String): void
+  + getPermissionsArray(): String[]
+  + toString(): String
+}
+
+class activityLogData << (E,#ffeb3b) Entity >> #e0f7fa {
+  - id: Integer
+  - username: String
+  - action: String
+  - module: String
+  - details: String
+  - timestamp: Timestamp
+  - ipAddress: String
+  + getId(): Integer
+  + getUsername(): String
+  + getAction(): String
+  + getModule(): String
+  + getDetails(): String
+  + getTimestamp(): Timestamp
+  + getIpAddress(): String
+  + setId(id: Integer): void
+  + setUsername(username: String): void
+  + setAction(action: String): void
+  + setModule(module: String): void
+  + setDetails(details: String): void
+  + setTimestamp(timestamp: Timestamp): void
+  + setIpAddress(ipAddress: String): void
+  + getFormattedTimestamp(): String
+  + getShortDetails(): String
+  + toString(): String
+}
+
+class reportData << (E,#ffeb3b) Entity >> #c8e6c9 {
+  - date: LocalDate
+  - category: String
+  - metric: String
+  - value: double
+  - change: double
+  - trend: String
+  + getDate(): LocalDate
+  + getCategory(): String
+  + getMetric(): String
+  + getValue(): double
+  + getChange(): double
+  + getTrend(): String
+  + setDate(date: LocalDate): void
+  + setCategory(category: String): void
+  + setMetric(metric: String): void
+  + setValue(value: double): void
+  + setChange(change: double): void
+  + setTrend(trend: String): void
+  + toString(): String
+}
+
+' Utility classes
+class passwordUtil << (U,#ffeb3b) Utility >> #dcedc8 {
+  - {static} SALT_LENGTH: int
+  + {static} hashPassword(plainTextPassword: String): String
+  + {static} checkPassword(plainTextPassword: String, storedHash: String): boolean
+  - {static} generateSalt(): byte[]
+  + {static} generateRandomPassword(length: int): String
+  + {static} isStrongPassword(password: String): boolean
+  + {static} getPasswordStrength(password: String): String
+}
+
+class reportGenerator << (U,#ffeb3b) Utility >> #c8e6c9 {
+  + generateMembershipReport(startDate: LocalDate, endDate: LocalDate, interval: String): List<reportData>
+  + generateFinancialReport(startDate: LocalDate, endDate: LocalDate, interval: String): List<reportData>
+  + generateEquipmentReport(startDate: LocalDate, endDate: LocalDate, interval: String): List<reportData>
+  + generateScheduleReport(startDate: LocalDate, endDate: LocalDate, interval: String): List<reportData>
+  + generateCoachReport(startDate: LocalDate, endDate: LocalDate, interval: String): List<reportData>
+  - calculateMetricsForPeriod(startDate: LocalDate, endDate: LocalDate, type: String): Map<String, Double>
+  - getResultsWithinPeriod(sql: String, startDate: LocalDate, endDate: LocalDate): ResultSet
+  - calculatePercentChange(current: double, previous: double): double
+}
+
+class reportExporter << (U,#ffeb3b) Utility >> #c8e6c9 {
+  + exportToPDF(reportTitle: String, reportData: List<reportData>, chartsToExport: List<Chart>): boolean
+  + exportToExcel(reportTitle: String, reportData: List<reportData>): boolean
+  + exportToCSV(reportTitle: String, reportData: List<reportData>): boolean
+  - createPDFHeader(document: Document, reportTitle: String): void
+  - addChartToPDF(document: Document, chart: Chart): void
+  - addDataTableToPDF(document: Document, reportData: List<reportData>): void
+  - createExcelWorkbook(reportTitle: String, reportData: List<reportData>): Workbook
+  - writeCSVFile(reportTitle: String, reportData: List<reportData>): boolean
+}
+
+' Data Access class
+class dataAccess << (DA,#ffeb3b) DAO >> {
+  - connect: Connection
+  + getAllEquipment(): List<equipmentData>
+  + addEquipment(equipment: equipmentData): boolean
+  + updateEquipment(equipment: equipmentData): boolean
+  + deleteEquipment(equipmentId: String): boolean
+  + generateEquipmentId(): String
+  + getAllSchedules(): List<scheduleData>
+  + addSchedule(schedule: scheduleData): boolean
+  + updateSchedule(schedule: scheduleData): boolean
+  + deleteSchedule(scheduleId: String): boolean
+  + generateScheduleId(): String
+  + getSchedulesByCoach(coachId: String): List<scheduleData>
+  + getAllPayments(): List<paymentData>
+  + addPayment(payment: paymentData): boolean
+  + updatePayment(payment: paymentData): boolean
+  + deletePayment(paymentId: String): boolean
+  + generatePaymentId(): String
+  + getPaymentsByMember(memberId: String): List<paymentData>
+}
+
+' Controllers
+class FXMLDocumentController << (C,#ffeb3b) Controller >> #bbdefb {
+  - main_form: AnchorPane
+  - sub_form: AnchorPane
+  - sub_signupBtn: Button
+  - sub_loginBtn: Button
+  - edit_label: Label
+  - signup_form: AnchorPane
+  - su_email: TextField
+  - su_username: TextField
+  - su_password: PasswordField
+  - su_signupBtn: Button
+  - login_form: AnchorPane
+  - si_username: TextField
+  - si_password: PasswordField
+  - si_loginBtn: Button
+  - close: Button
+  - close_icon: FontAwesomeIcon
+  - connect: Connection
+  - prepare: PreparedStatement
+  - result: ResultSet
+  + login(): void
+  + signup(): void
+  + signupSlider(): void
+  + loginSlider(): void
+  + close(): void
+  + initialize(url: URL, rb: ResourceBundle): void
+}
+
+class dashboardController << (C,#ffeb3b) Controller >> #bbdefb {
+  - connect: Connection
+  - prepare: PreparedStatement
+  - result: ResultSet
+  - statement: Statement
+  - equipmentStatusList: String[]
+  - daysList: String[]
+  - scheduleStatusList: String[]
+  - currentReportType: String
+  ' Other fields not shown for brevity
+  + equipmentStatusList(): void
+  + equipmentAddBtn(): void
+  + equipmentUpdateBtn(): void
+  + equipmentDeleteBtn(): void
+  + equipmentClearBtn(): void
+  + equipmentDataList(): ObservableList<equipmentData>
+  + equipmentShowData(): void
+  + equipmentSelect(): void
+  + coachesAddBtn(): void
+  + coachesUpdateBtn(): void
+  + coachesDeleteBtn(): void
+  + coachesClearBtn(): void
+  + coachesDataList(): ObservableList<coachData>
+  + coachesShowData(): void
+  + coachesSelect(): void
+  + membersAddBtn(): void
+  + membersUpdate(): void
+  + membersDelete(): void
+  + membersClear(): void
+  + membersGender(): void
+  + membersSchedule(): void
+  + membersStatus(): void
+  + membersDataList(): ObservableList<memberData>
+  + membersShowData(): void
+  + membersSelect(): void
+  + paymentMemberId(): void
+  + paymentName(): void
+  + displayTotal(): void
+  + paymentDisplayTotal(): void
+  + paymentAmount(): void
+  + paymentPayBtn(): void
+  + paymentClear(): void
+  + paymentDataList(): ObservableList<memberData>
+  + paymentShowData(): void
+  + displayUsername(): void
+  + switchForm(event: ActionEvent): void
+  + logout(): void
+  + minimize(): void
+  + close(): void
+  + initializeReportIntervals(): void
+  + generateReport(): void
+  + exportReport(): void
+  + initialize(location: URL, resources: ResourceBundle): void
+  + scheduleDaysList(): void
+  + scheduleStatusList(): void
+  + scheduleCoachList(): void
+  + scheduleAddBtn(): void
+  + scheduleUpdateBtn(): void
+  + scheduleDeleteBtn(): void
+  + scheduleClearBtn(): void
+  + scheduleDataList(): ObservableList<scheduleData>
+  + scheduleShowData(): void
+  + scheduleSelect(): void
+  + adminAddBtn(): void
+  + adminUpdateBtn(): void
+  + adminDeleteBtn(): void
+  + adminClearBtn(): void
+  + adminDataList(): ObservableList<adminData>
+  + adminShowData(): void
+  + adminSelect(): void
+  + logActivity(action: String, module: String, details: String): void
+  + activityLogDataList(): ObservableList<activityLogData>
+  + adminShowLogData(): void
+}
+
+' Relationships
+GymManagementSystem --> FXMLDocumentController : launches >
+FXMLDocumentController --> dashboardController : opens >
+
+database <.. GymManagementSystem : uses >
+database <.. FXMLDocumentController : uses >
+database <.. dashboardController : uses >
+database <.. dataAccess : uses >
+
+dataAccess ..> equipmentData : manages >
+dataAccess ..> scheduleData : manages >
+dataAccess ..> paymentData : manages >
+
+dashboardController ..> memberData : manages >
+dashboardController ..> coachData : manages >
+dashboardController ..> equipmentData : manages >
+dashboardController ..> scheduleData : manages >
+dashboardController ..> paymentData : manages >
+dashboardController ..> adminData : manages >
+dashboardController ..> activityLogData : manages >
+dashboardController ..> reportData : manages >
+dashboardController ..> roleData : manages >
+
+dashboardController ..> dataAccess : uses >
+dashboardController ..> passwordUtil : uses >
+dashboardController ..> reportGenerator : uses >
+dashboardController ..> reportExporter : uses >
+
+FXMLDocumentController ..> passwordUtil : uses >
+FXMLDocumentController ..> data : uses >
+
+scheduleData "0..*" -- "1" coachData : assigned to >
+paymentData "0..*" -- "1" memberData : made by >
+
+@enduml 
