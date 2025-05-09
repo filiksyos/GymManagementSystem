@@ -13,5 +13,24 @@ package gymmanagementsystem;
 public class data {
     
     public static String username;
+    public static String userRole;
+    public static Integer userId;
+    public static String userFullName;
+    
+    // Check if the current user has a specific permission
+    public static boolean hasPermission(String permission) {
+        if (userRole == null) {
+            return false;
+        }
+        
+        // Super admin has all permissions
+        if (userRole.equals("SUPER_ADMIN")) {
+            return true;
+        }
+        
+        // Other roles need to be checked against the database
+        // This is a placeholder - actual implementation will be in the dashboard controller
+        return false;
+    }
     
 }

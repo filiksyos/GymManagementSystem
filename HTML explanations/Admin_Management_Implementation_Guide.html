@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Management Tab Implementation Guide</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        h1, h2, h3 { color: #333; }
+        .note { background-color: #f0f0f0; padding: 10px; border-left: 4px solid #666; margin: 10px 0; }
+        .important { background-color: #f8d7da; padding: 10px; border-left: 4px solid #721c24; margin: 10px 0; }
+        pre { background-color: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        .phase { margin-bottom: 30px; }
+        .file-changes { background-color: #e8f4ff; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        table { width: 100%; border-collapse: collapse; }
+        table, th, td { border: 1px solid #ddd; }
+        th, td { padding: 10px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Admin Management Tab Implementation Guide</h1>
+    <div class="note">
+        This guide outlines the implementation steps for adding an Admin Management feature to the Gym Management System,
+        which is the final component for Phase 3 completion.
+    </div>
+
+    <div class="phase">
+        <h2>1. Overview</h2>
+        <p>The Admin Management tab will provide a centralized interface for managing system users (admins) with:</p>
+        <ul>
+            <li>User account creation and management</li>
+            <li>Role-based access control</li>
+            <li>Password management with security features</li>
+            <li>Account status management</li>
+            <li>Access logs and activity tracking</li>
+        </ul>
+
+        <pre class="mermaid">
+graph TD
+    A[Admin Management Dashboard] --> B[User Account Management]
+    A --> C[Role Management]
+    A --> D[Security Settings]
+    A --> E[Activity Logs]
+    
+    B --> B1[Create Accounts]
+    B --> B2[Edit Accounts]
+    B --> B3[Deactivate Accounts]
+    
+    C --> C1[Assign Roles]
+    C --> C2[Define Permissions]
+    
+    D --> D1[Password Policies]
+    D --> D2[Reset Passwords]
+    
+    E --> E1[Login History]
+    E --> E2[Action Logs]</pre>
+    </div>
+
+    <div class="phase">
+        <h2>2. Files to Modify</h2>
+        <div class="file-changes">
+            <h3>2.1 New Files to Create</h3>
+            <ul>
+                <li><strong>adminData.java</strong> - Data model for admin users</li>
+                <li><strong>roleData.java</strong> - Data model for user roles</li>
+                <li><strong>activityLogData.java</strong> - Data model for activity logs</li>
+                <li><strong>passwordUtil.java</strong> - Utility class for password handling</li>
+            </ul>
+
+            <h3>2.2 Existing Files to Modify</h3>
+            <ul>
+                <li><strong>dashboard.fxml</strong> - Add Admin tab UI components</li>
+                <li><strong>dashboardController.java</strong> - Add admin management functionality</li>
+                <li><strong>FXMLDocumentController.java</strong> - Enhance login functionality</li>
+                <li><strong>database.java</strong> - Update with admin table connectivity</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="phase">
+        <h2>3. Database Schema Updates</h2>
+        <p>The following tables need to be created in the database:</p>
+
+        <pre>
+-- Admin user table
+CREATE TABLE `admin` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `fullName` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `role` varchar(50) NOT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'active',
+  `lastLogin` datetime DEFAULT NULL,
+  `createdBy` varchar(50) DEFAULT NULL,
+  `createdAt` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username_UNIQUE` (`username`)
+);
+
+-- Roles table
+CREATE TABLE `role` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `roleName` varchar(50) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `permissions` text,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `roleName_UNIQUE` (`roleName`)
+);
+
+-- Activity log table
+CREATE TABLE `activity_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `action` varchar(255) NOT NULL,
+  `module` varchar(50) NOT NULL,
+  `details` text,
+  `timestamp` datetime DEFAULT CURRENT_TIMESTAMP,
+  `ipAddress` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+);</pre>
+
+        <h3>3.1 Default Data</h3>
+        <p>Populate the role table with default roles:</p>
+        
+        <pre>
+INSERT INTO `role` (`roleName`, `description`, `permissions`) VALUES
+('SUPER_ADMIN', 'Full system access with all permissions', 'ALL'),
+('ADMIN', 'Administrative access with limited system settings', 'MANAGE_USERS,MANAGE_MEMBERS,MANAGE_COACHES,MANAGE_EQUIPMENT,MANAGE_SCHEDULE,VIEW_REPORTS'),
+('MANAGER', 'Manage day-to-day operations', 'MANAGE_MEMBERS,MANAGE_COACHES,MANAGE_SCHEDULE,VIEW_REPORTS'),
+('STAFF', 'Basic staff access', 'VIEW_MEMBERS,VIEW_COACHES,VIEW_SCHEDULE');</pre>
+
+        <p>Create a default super admin account:</p>
+        
+        <pre>
+-- Note: This example uses a hashed password 'admin123'
+INSERT INTO `admin` (`username`, `password`, `fullName`, `email`, `role`, `status`) VALUES
+('admin', '$2a$10$dR0EjY4.3/YIaPX0NPrJhuJXDCl9UpiNOJrLnK5.j3NsAGQ4BDHEG', 'System Administrator', 'admin@gym.com', 'SUPER_ADMIN', 'active');</pre>
+    </div>
+
+    <div class="phase">
+        <h2>4. UI Components</h2>
+        <h3>Required FXML Elements:</h3>
+        <pre>
+&lt;AnchorPane fx:id="admin_form"&gt;
+    &lt;!-- Left Section: User Management --&gt;
+    &lt;AnchorPane styleClass="white-bg" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="18.0"&gt;
+        &lt;TextField fx:id="admin_search" promptText="Search users..." /&gt;
+        
+        &lt;TableView fx:id="admin_tableView"&gt;
+            &lt;columns&gt;
+                &lt;TableColumn fx:id="admin_col_username" text="Username" /&gt;
+                &lt;TableColumn fx:id="admin_col_fullName" text="Full Name" /&gt;
+                &lt;TableColumn fx:id="admin_col_email" text="Email" /&gt;
+                &lt;TableColumn fx:id="admin_col_role" text="Role" /&gt;
+                &lt;TableColumn fx:id="admin_col_status" text="Status" /&gt;
+                &lt;TableColumn fx:id="admin_col_lastLogin" text="Last Login" /&gt;
+            &lt;/columns&gt;
+        &lt;/TableView&gt;
+    &lt;/AnchorPane&gt;
+    
+    &lt;!-- Right Section: User Details Form --&gt;
+    &lt;AnchorPane styleClass="white-bg" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="18.0"&gt;
+        &lt;Label text="Username:" /&gt;
+        &lt;TextField fx:id="admin_username" /&gt;
+        
+        &lt;Label text="Password:" /&gt;
+        &lt;PasswordField fx:id="admin_password" /&gt;
+        
+        &lt;Label text="Full Name:" /&gt;
+        &lt;TextField fx:id="admin_fullName" /&gt;
+        
+        &lt;Label text="Email:" /&gt;
+        &lt;TextField fx:id="admin_email" /&gt;
+        
+        &lt;Label text="Role:" /&gt;
+        &lt;ComboBox fx:id="admin_role" /&gt;
+        
+        &lt;Label text="Status:" /&gt;
+        &lt;ComboBox fx:id="admin_status" /&gt;
+        
+        &lt;Button fx:id="admin_addBtn" text="Add" onAction="#adminAddBtn" /&gt;
+        &lt;Button fx:id="admin_updateBtn" text="Update" onAction="#adminUpdateBtn" /&gt;
+        &lt;Button fx:id="admin_deleteBtn" text="Delete" onAction="#adminDeleteBtn" /&gt;
+        &lt;Button fx:id="admin_clearBtn" text="Clear" onAction="#adminClearBtn" /&gt;
+    &lt;/AnchorPane&gt;
+    
+    &lt;!-- Bottom Section: Activity Logs --&gt;
+    &lt;AnchorPane styleClass="white-bg" AnchorPane.bottomAnchor="18.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0"&gt;
+        &lt;Label text="Activity Logs" /&gt;
+        &lt;TableView fx:id="admin_logTableView"&gt;
+            &lt;columns&gt;
+                &lt;TableColumn fx:id="log_col_timestamp" text="Timestamp" /&gt;
+                &lt;TableColumn fx:id="log_col_username" text="Username" /&gt;
+                &lt;TableColumn fx:id="log_col_action" text="Action" /&gt;
+                &lt;TableColumn fx:id="log_col_module" text="Module" /&gt;
+                &lt;TableColumn fx:id="log_col_details" text="Details" /&gt;
+            &lt;/columns&gt;
+        &lt;/TableView&gt;
+    &lt;/AnchorPane&gt;
+&lt;/AnchorPane&gt;</pre>
+    </div>
+
+    <div class="phase">
+        <h2>5. Data Models</h2>
+        <h3>5.1 adminData.java</h3>
+        <pre>
+public class adminData {
+    private int id;
+    private String username;
+    private String password;
+    private String fullName;
+    private String email;
+    private String role;
+    private String status;
+    private Date lastLogin;
+    private String createdBy;
+    private Date createdAt;
+    
+    // Constructor, getters, setters
+}</pre>
+
+        <h3>5.2 roleData.java</h3>
+        <pre>
+public class roleData {
+    private int id;
+    private String roleName;
+    private String description;
+    private String permissions;
+    
+    // Constructor, getters, setters
+}</pre>
+
+        <h3>5.3 activityLogData.java</h3>
+        <pre>
+public class activityLogData {
+    private int id;
+    private String username;
+    private String action;
+    private String module;
+    private String details;
+    private Date timestamp;
+    private String ipAddress;
+    
+    // Constructor, getters, setters
+}</pre>
+    </div>
+
+    <div class="phase">
+        <h2>6. Password Security</h2>
+        <div class="important">
+            <strong>Security Note:</strong> Never store plain-text passwords. Always use secure hashing algorithms.
+        </div>
+        
+        <h3>6.1 passwordUtil.java</h3>
+        <p>Create a utility class for secure password handling:</p>
+        
+        <pre>
+import org.mindrot.jbcrypt.BCrypt;
+
+public class passwordUtil {
+    
+    // Hash a password
+    public static String hashPassword(String plainTextPassword) {
+        return BCrypt.hashpw(plainTextPassword, BCrypt.gensalt(12));
+    }
+    
+    // Verify a password against a hash
+    public static boolean checkPassword(String plainTextPassword, String hashedPassword) {
+        return BCrypt.checkpw(plainTextPassword, hashedPassword);
+    }
+    
+    // Generate a random password
+    public static String generateRandomPassword(int length) {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+        StringBuilder sb = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < length; i++) {
+            int index = random.nextInt(chars.length());
+            sb.append(chars.charAt(index));
+        }
+        return sb.toString();
+    }
+    
+    // Validate password strength
+    public static boolean isStrongPassword(String password) {
+        // At least 8 characters
+        if (password.length() < 8) {
+            return false;
+        }
+        
+        // Contains at least one digit
+        if (!password.matches(".*\\d.*")) {
+            return false;
+        }
+        
+        // Contains at least one lowercase letter
+        if (!password.matches(".*[a-z].*")) {
+            return false;
+        }
+        
+        // Contains at least one uppercase letter
+        if (!password.matches(".*[A-Z].*")) {
+            return false;
+        }
+        
+        // Contains at least one special character
+        if (!password.matches(".*[!@#$%^&*()].*")) {
+            return false;
+        }
+        
+        return true;
+    }
+}</pre>
+
+        <div class="note">
+            <strong>Implementation Note:</strong> The BCrypt library needs to be added to the project dependencies.
+<pre>
+// For Maven
+&lt;dependency&gt;
+    &lt;groupId&gt;org.mindrot&lt;/groupId&gt;
+    &lt;artifactId&gt;jbcrypt&lt;/artifactId&gt;
+    &lt;version&gt;0.4&lt;/version&gt;
+&lt;/dependency&gt;
+
+// For Gradle
+implementation 'org.mindrot:jbcrypt:0.4'
+</pre>
+        </div>
+    </div>
+
+    <div class="phase">
+        <h2>7. Controller Implementation</h2>
+        <h3>7.1 Admin Management Methods</h3>
+        <p>Add the following methods to dashboardController.java:</p>
+        
+        <pre class="mermaid">
+sequenceDiagram
+    participant UI as User Interface
+    participant Controller as dashboardController 
+    participant DB as Database
+    
+    UI->>Controller: User Input (Add/Update/Delete)
+    Controller->>Controller: Validate Input
+    Controller->>DB: Execute Query
+    DB-->>Controller: Return Status
+    Controller->>Controller: Log Activity
+    Controller->>UI: Update UI</pre>
+        
+        <h3>Key Methods to Implement:</h3>
+        <ul>
+            <li><strong>adminAddBtn()</strong> - Add a new admin user</li>
+            <li><strong>adminUpdateBtn()</strong> - Update existing admin user</li>
+            <li><strong>adminDeleteBtn()</strong> - Delete admin user</li>
+            <li><strong>adminClearBtn()</strong> - Clear form fields</li>
+            <li><strong>adminRoleList()</strong> - Populate role dropdown</li>
+            <li><strong>adminStatusList()</strong> - Populate status dropdown</li>
+            <li><strong>adminShowData()</strong> - Display admin users in table</li>
+            <li><strong>adminSelect()</strong> - Handle table row selection</li>
+            <li><strong>adminSearch()</strong> - Filter admin users</li>
+            <li><strong>logActivity()</strong> - Log user activities</li>
+            <li><strong>showActivityLogs()</strong> - Display activity logs</li>
+        </ul>
+    </div>
+
+    <div class="phase">
+        <h2>8. Login System Enhancement</h2>
+        <p>Update the FXMLDocumentController.java file to work with the new admin table:</p>
+        
+        <pre class="mermaid">
+sequenceDiagram
+    participant UI as Login Screen
+    participant Controller as FXMLDocumentController
+    participant Util as passwordUtil
+    participant DB as Database
+    
+    UI->>Controller: Submit Login
+    Controller->>DB: Query User
+    DB-->>Controller: Return User Data
+    Controller->>Util: Verify Password
+    Util-->>Controller: Authentication Result
+    Controller->>DB: Log Login Attempt
+    Controller->>UI: Success/Error</pre>
+        
+        <h3>Key Login Updates:</h3>
+        <ul>
+            <li>Query the admin table instead of the old login mechanism</li>
+            <li>Use passwordUtil to verify password hash</li>
+            <li>Update last login timestamp on successful login</li>
+            <li>Log login attempts (successful and failed)</li>
+            <li>Store logged in user's role in the data class for access control</li>
+        </ul>
+    </div>
+
+    <div class="phase">
+        <h2>9. Access Control Implementation</h2>
+        <p>Implement role-based access control in the dashboardController:</p>
+        
+        <pre>
+public void applyAccessControl() {
+    // Get current user's role
+    String userRole = data.userRole;
+    
+    // Apply permissions based on role
+    switch(userRole) {
+        case "SUPER_ADMIN":
+            // Full access - all features enabled
+            break;
+            
+        case "ADMIN":
+            // Most features enabled, but restrict system settings
+            admin_form.setVisible(false);
+            admin_btn.setVisible(false);
+            break;
+            
+        case "MANAGER":
+            // Restrict administrative features
+            admin_form.setVisible(false);
+            admin_btn.setVisible(false);
+            // Additional restrictions
+            break;
+            
+        case "STAFF":
+            // Basic access only
+            admin_form.setVisible(false);
+            admin_btn.setVisible(false);
+            // Many restrictions
+            break;
+            
+        default:
+            // Minimal access
+            break;
+    }
+}</pre>
+
+        <p>Call this method from the initialize() method to apply access control when the dashboard loads.</p>
+    </div>
+
+    <div class="phase">
+        <h2>10. Activity Logging System</h2>
+        <p>Implement a centralized logging system to track user activities:</p>
+        
+        <pre>
+public void logActivity(String action, String module, String details) {
+    try {
+        connect = database.connectDb();
+        
+        String sql = "INSERT INTO activity_log (username, action, module, details, ipAddress) VALUES (?,?,?,?,?)";
+        
+        prepare = connect.prepareStatement(sql);
+        prepare.setString(1, data.username);
+        prepare.setString(2, action);
+        prepare.setString(3, module);
+        prepare.setString(4, details);
+        prepare.setString(5, "127.0.0.1"); // In a real app, get the actual IP
+        
+        prepare.executeUpdate();
+        
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}</pre>
+
+        <p>Call this method whenever significant actions are performed in the system.</p>
+    </div>
+
+    <div class="phase">
+        <h2>11. Implementation Steps</h2>
+        
+        <pre class="mermaid">
+graph TD
+    A[Step 1: Database Setup] --> B[Step 2: Create Data Models]
+    B --> C[Step 3: Implement Password Utility]
+    C --> D[Step 4: Add UI Components]
+    D --> E[Step 5: Implement Controller Methods]
+    E --> F[Step 6: Update Login System]
+    F --> G[Step 7: Implement Access Control]
+    G --> H[Step 8: Add Activity Logging]
+    H --> I[Step 9: Testing]</pre>
+        
+        <h3>Detailed Steps:</h3>
+        <ol>
+            <li><strong>Database Setup</strong>
+                <ul>
+                    <li>Create the admin, role, and activity_log tables</li>
+                    <li>Insert default data for roles and a super admin account</li>
+                </ul>
+            </li>
+            <li><strong>Create Data Models</strong>
+                <ul>
+                    <li>Create adminData.java, roleData.java, and activityLogData.java</li>
+                </ul>
+            </li>
+            <li><strong>Implement Password Utility</strong>
+                <ul>
+                    <li>Create passwordUtil.java for secure password handling</li>
+                    <li>Add dependency for BCrypt library</li>
+                </ul>
+            </li>
+            <li><strong>Add UI Components</strong>
+                <ul>
+                    <li>Modify dashboard.fxml to include admin management tab</li>
+                    <li>Add admin_btn to the sidebar</li>
+                </ul>
+            </li>
+            <li><strong>Implement Controller Methods</strong>
+                <ul>
+                    <li>Add admin management methods to dashboardController.java</li>
+                    <li>Implement data handling and UI interactions</li>
+                </ul>
+            </li>
+            <li><strong>Update Login System</strong>
+                <ul>
+                    <li>Modify FXMLDocumentController.java to use the admin table</li>
+                    <li>Implement secure password verification</li>
+                </ul>
+            </li>
+            <li><strong>Implement Access Control</strong>
+                <ul>
+                    <li>Add role-based access control to restrict features</li>
+                </ul>
+            </li>
+            <li><strong>Add Activity Logging</strong>
+                <ul>
+                    <li>Implement logging for important actions</li>
+                    <li>Display logs in the admin interface</li>
+                </ul>
+            </li>
+            <li><strong>Testing</strong>
+                <ul>
+                    <li>Test with different user roles</li>
+                    <li>Verify all CRUD operations</li>
+                    <li>Check access control functionality</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <div class="phase">
+        <h2>12. Testing Checklist</h2>
+        <table>
+            <tr>
+                <th>Feature</th>
+                <th>Test Case</th>
+                <th>Expected Result</th>
+            </tr>
+            <tr>
+                <td>User Creation</td>
+                <td>Create new admin user with valid data</td>
+                <td>User added successfully with hashed password</td>
+            </tr>
+            <tr>
+                <td>Password Security</td>
+                <td>Attempt to create user with weak password</td>
+                <td>System rejects with appropriate message</td>
+            </tr>
+            <tr>
+                <td>User Authentication</td>
+                <td>Login with valid credentials</td>
+                <td>Login successful, last login timestamp updated</td>
+            </tr>
+            <tr>
+                <td>Access Control</td>
+                <td>Login as different roles</td>
+                <td>UI elements visible/hidden based on role</td>
+            </tr>
+            <tr>
+                <td>User Management</td>
+                <td>Update user details</td>
+                <td>Changes saved and logged</td>
+            </tr>
+            <tr>
+                <td>User Deletion</td>
+                <td>Delete user account</td>
+                <td>User removed from system, action logged</td>
+            </tr>
+            <tr>
+                <td>Activity Logging</td>
+                <td>Perform various system actions</td>
+                <td>All actions appear in activity log</td>
+            </tr>
+        </table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true});</script>
+</body>
+</html> 

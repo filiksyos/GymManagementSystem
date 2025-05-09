@@ -23,6 +23,8 @@ The database consists of the following tables:
 4. `equipment` - Gym equipment inventory
 5. `schedule` - Class schedules
 6. `payment` - Member payment records
+7. `role` - User roles for access control
+8. `activity_log` - User activity tracking
 
 ## Setup Instructions
 
@@ -68,6 +70,32 @@ This happens because foreign key columns need unique indexes. The `fix_foreign_k
 
 If you see permission errors when accessing information_schema:
 1. Use `fix_foreign_key_simplified.sql` which doesn't rely on information_schema
+
+## Admin Management System
+
+### New Admin Management Features
+
+The latest database update includes enhanced admin management capabilities:
+
+1. **Enhanced Admin Table** - Extended with role-based access control
+2. **Role Management** - New role table for granular permissions
+3. **Activity Logging** - Comprehensive activity tracking
+
+### Admin Management Scripts
+
+- **admin_management_tables.sql** - Adds role-based access control and activity logging
+- **verify_admin_tables.sql** - Checks that admin management tables are properly set up
+- **migrate_admin_passwords.sql** - Prepares existing accounts for password security upgrade
+
+### Implementing Admin Management
+
+To add admin management to your system:
+
+1. Run `admin_management_tables.sql` to update database structure
+2. Run `verify_admin_tables.sql` to confirm tables are correctly set up
+3. Use `migrate_admin_passwords.sql` to prepare for password security updates
+4. Implement the Java components (adminData, roleData, activityLogData, passwordUtil)
+5. Update the UI to include admin management screens
 
 ## Next Steps
 
