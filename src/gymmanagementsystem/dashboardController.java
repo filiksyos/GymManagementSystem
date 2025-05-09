@@ -327,12 +327,78 @@ public class dashboardController implements Initializable {
     @FXML
     private AnchorPane schedule_form;
 
+    // Schedule form components
+    @FXML
+    private TextField schedule_id;
+    
+    @FXML
+    private TextField schedule_className;
+    
+    @FXML
+    private ComboBox<String> schedule_coachId;
+    
+    @FXML
+    private ComboBox<String> schedule_dayOfWeek;
+    
+    @FXML
+    private TextField schedule_startTime;
+    
+    @FXML
+    private TextField schedule_endTime;
+    
+    @FXML
+    private TextField schedule_maxCapacity;
+    
+    @FXML
+    private ComboBox<String> schedule_status;
+    
+    @FXML
+    private Button schedule_addBtn;
+    
+    @FXML
+    private Button schedule_updateBtn;
+    
+    @FXML
+    private Button schedule_resetBtn;
+    
+    @FXML
+    private Button schedule_deleteBtn;
+    
+    @FXML
+    private TableView<scheduleData> schedule_tableView;
+    
+    @FXML
+    private TableColumn<scheduleData, String> schedule_col_id;
+    
+    @FXML
+    private TableColumn<scheduleData, String> schedule_col_className;
+    
+    @FXML
+    private TableColumn<scheduleData, String> schedule_col_coachId;
+    
+    @FXML
+    private TableColumn<scheduleData, String> schedule_col_dayOfWeek;
+    
+    @FXML
+    private TableColumn<scheduleData, String> schedule_col_timeRange;
+    
+    @FXML
+    private TableColumn<scheduleData, Integer> schedule_col_capacity;
+    
+    @FXML
+    private TableColumn<scheduleData, Integer> schedule_col_enrollment;
+    
+    @FXML
+    private TableColumn<scheduleData, String> schedule_col_status;
+
     private Connection connect;
     private PreparedStatement prepare;
     private ResultSet result;
     private Statement statement;
 
     private String[] equipmentStatusList = {"Working", "Maintenance", "Out of Order"};
+    private String[] daysList = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+    private String[] scheduleStatusList = {"Active", "Cancelled", "Full"};
 
     public void equipmentStatusList() {
         List<String> statusL = new ArrayList<>();
@@ -1663,6 +1729,281 @@ public class dashboardController implements Initializable {
         equipmentStatusList();
         equipmentShowData();
 
+        // Initialize schedule functionality
+        scheduleDaysList();
+        scheduleStatusList();
+        scheduleCoachList();
+        scheduleShowData();
+
+        // Add mouse click event handler for schedule table
+        schedule_tableView.setOnMouseClicked((MouseEvent event) -> {
+            scheduleSelect();
+        });
+
+    }
+
+    // Schedule Management Methods
+    
+    public void scheduleDaysList() {
+        List<String> dayList = new ArrayList<>();
+        for(String data: daysList) {
+            dayList.add(data);
+        }
+        ObservableList listData = FXCollections.observableArrayList(dayList);
+        schedule_dayOfWeek.setItems(listData);
+    }
+    
+    public void scheduleStatusList() {
+        List<String> statusList = new ArrayList<>();
+        for(String data: scheduleStatusList) {
+            statusList.add(data);
+        }
+        ObservableList listData = FXCollections.observableArrayList(statusList);
+        schedule_status.setItems(listData);
+    }
+    
+    public void scheduleCoachList() {
+        String sql = "SELECT coachId FROM coach WHERE status = 'Active'";
+        connect = database.connectDb();
+        
+        try {
+            ObservableList listData = FXCollections.observableArrayList();
+            prepare = connect.prepareStatement(sql);
+            result = prepare.executeQuery();
+            
+            while(result.next()) {
+                listData.add(result.getString("coachId"));
+            }
+            schedule_coachId.setItems(listData);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void scheduleAddBtn() {
+        String sql = "INSERT INTO schedule (scheduleId, className, coachId, dayOfWeek, startTime, endTime, maxCapacity, status) "
+                + "VALUES(?,?,?,?,?,?,?,?)";
+        
+        connect = database.connectDb();
+        
+        try {
+            Alert alert;
+            
+            if(schedule_id.getText().isEmpty() || schedule_className.getText().isEmpty()
+                    || schedule_coachId.getSelectionModel().getSelectedItem() == null
+                    || schedule_dayOfWeek.getSelectionModel().getSelectedItem() == null
+                    || schedule_startTime.getText().isEmpty()
+                    || schedule_endTime.getText().isEmpty()
+                    || schedule_maxCapacity.getText().isEmpty()
+                    || schedule_status.getSelectionModel().getSelectedItem() == null) {
+                emptyFields();
+            } else {
+                String checkData = "SELECT scheduleId FROM schedule WHERE scheduleId = '"
+                        + schedule_id.getText() + "'";
+                
+                statement = connect.createStatement();
+                result = statement.executeQuery(checkData);
+                
+                if(result.next()) {
+                    alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("Error Message");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Schedule ID: " + schedule_id.getText() + " already exists!");
+                    alert.showAndWait();
+                } else {
+                    prepare = connect.prepareStatement(sql);
+                    prepare.setString(1, schedule_id.getText());
+                    prepare.setString(2, schedule_className.getText());
+                    prepare.setString(3, schedule_coachId.getSelectionModel().getSelectedItem());
+                    prepare.setString(4, schedule_dayOfWeek.getSelectionModel().getSelectedItem());
+                    prepare.setString(5, schedule_startTime.getText());
+                    prepare.setString(6, schedule_endTime.getText());
+                    prepare.setString(7, schedule_maxCapacity.getText());
+                    prepare.setString(8, schedule_status.getSelectionModel().getSelectedItem());
+                    
+                    alert = new Alert(AlertType.INFORMATION);
+                    alert.setTitle("Information Message");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Successfully Added!");
+                    alert.showAndWait();
+                    
+                    prepare.executeUpdate();
+                    scheduleShowData();
+                    scheduleClearBtn();
+                }
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void scheduleUpdateBtn() {
+        String sql = "UPDATE schedule SET className = '"
+                + schedule_className.getText() + "', coachId = '"
+                + schedule_coachId.getSelectionModel().getSelectedItem() + "', dayOfWeek = '"
+                + schedule_dayOfWeek.getSelectionModel().getSelectedItem() + "', startTime = '"
+                + schedule_startTime.getText() + "', endTime = '"
+                + schedule_endTime.getText() + "', maxCapacity = '"
+                + schedule_maxCapacity.getText() + "', status = '"
+                + schedule_status.getSelectionModel().getSelectedItem() + "' WHERE scheduleId = '"
+                + schedule_id.getText() + "'";
+        
+        connect = database.connectDb();
+        
+        try {
+            Alert alert;
+            if(schedule_id.getText().isEmpty() || schedule_className.getText().isEmpty()
+                    || schedule_coachId.getSelectionModel().getSelectedItem() == null
+                    || schedule_dayOfWeek.getSelectionModel().getSelectedItem() == null
+                    || schedule_startTime.getText().isEmpty()
+                    || schedule_endTime.getText().isEmpty()
+                    || schedule_maxCapacity.getText().isEmpty()
+                    || schedule_status.getSelectionModel().getSelectedItem() == null) {
+                emptyFields();
+            } else {
+                alert = new Alert(AlertType.CONFIRMATION);
+                alert.setTitle("Confirmation Message");
+                alert.setHeaderText(null);
+                alert.setContentText("Are you sure you want to UPDATE Schedule ID: " + schedule_id.getText() + "?");
+                Optional<ButtonType> option = alert.showAndWait();
+                
+                if(option.get().equals(ButtonType.OK)) {
+                    statement = connect.createStatement();
+                    statement.executeUpdate(sql);
+                    
+                    alert = new Alert(AlertType.INFORMATION);
+                    alert.setTitle("Information Message");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Successfully Updated!");
+                    alert.showAndWait();
+                    
+                    scheduleShowData();
+                    scheduleClearBtn();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void scheduleDeleteBtn() {
+        String sql = "DELETE FROM schedule WHERE scheduleId = '"
+                + schedule_id.getText() + "'";
+        
+        connect = database.connectDb();
+        
+        try {
+            Alert alert;
+            if(schedule_id.getText().isEmpty() || schedule_className.getText().isEmpty()
+                    || schedule_coachId.getSelectionModel().getSelectedItem() == null
+                    || schedule_dayOfWeek.getSelectionModel().getSelectedItem() == null
+                    || schedule_startTime.getText().isEmpty()
+                    || schedule_endTime.getText().isEmpty()
+                    || schedule_maxCapacity.getText().isEmpty()
+                    || schedule_status.getSelectionModel().getSelectedItem() == null) {
+                emptyFields();
+            } else {
+                alert = new Alert(AlertType.CONFIRMATION);
+                alert.setTitle("Confirmation Message");
+                alert.setHeaderText(null);
+                alert.setContentText("Are you sure you want to DELETE Schedule ID: " + schedule_id.getText() + "?");
+                Optional<ButtonType> option = alert.showAndWait();
+                
+                if(option.get().equals(ButtonType.OK)) {
+                    prepare = connect.prepareStatement(sql);
+                    prepare.executeUpdate();
+                    
+                    alert = new Alert(AlertType.INFORMATION);
+                    alert.setTitle("Information Message");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Successfully Deleted!");
+                    alert.showAndWait();
+                    
+                    scheduleShowData();
+                    scheduleClearBtn();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void scheduleClearBtn() {
+        schedule_id.setText("");
+        schedule_className.setText("");
+        schedule_coachId.getSelectionModel().clearSelection();
+        schedule_dayOfWeek.getSelectionModel().clearSelection();
+        schedule_startTime.setText("");
+        schedule_endTime.setText("");
+        schedule_maxCapacity.setText("");
+        schedule_status.getSelectionModel().clearSelection();
+    }
+    
+    public ObservableList<scheduleData> scheduleDataList() {
+        ObservableList<scheduleData> listData = FXCollections.observableArrayList();
+        String sql = "SELECT * FROM schedule";
+        
+        connect = database.connectDb();
+        
+        try {
+            prepare = connect.prepareStatement(sql);
+            result = prepare.executeQuery();
+            scheduleData sData;
+            
+            while(result.next()) {
+                sData = new scheduleData(
+                        result.getInt("id"),
+                        result.getString("scheduleId"),
+                        result.getString("className"),
+                        result.getString("coachId"),
+                        result.getString("dayOfWeek"),
+                        result.getTime("startTime"),
+                        result.getTime("endTime"),
+                        result.getInt("maxCapacity"),
+                        result.getInt("currentEnrollment"),
+                        result.getString("status")
+                );
+                listData.add(sData);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return listData;
+    }
+    
+    private ObservableList<scheduleData> scheduleListData;
+    
+    public void scheduleShowData() {
+        scheduleListData = scheduleDataList();
+        
+        schedule_col_id.setCellValueFactory(new PropertyValueFactory<>("scheduleId"));
+        schedule_col_className.setCellValueFactory(new PropertyValueFactory<>("className"));
+        schedule_col_coachId.setCellValueFactory(new PropertyValueFactory<>("coachId"));
+        schedule_col_dayOfWeek.setCellValueFactory(new PropertyValueFactory<>("dayOfWeek"));
+        schedule_col_timeRange.setCellValueFactory(new PropertyValueFactory<>("timeRange"));
+        schedule_col_capacity.setCellValueFactory(new PropertyValueFactory<>("maxCapacity"));
+        schedule_col_enrollment.setCellValueFactory(new PropertyValueFactory<>("currentEnrollment"));
+        schedule_col_status.setCellValueFactory(new PropertyValueFactory<>("status"));
+        
+        schedule_tableView.setItems(scheduleListData);
+    }
+    
+    public void scheduleSelect() {
+        scheduleData sData = schedule_tableView.getSelectionModel().getSelectedItem();
+        int num = schedule_tableView.getSelectionModel().getSelectedIndex();
+        
+        if((num - 1) < -1) return;
+        
+        schedule_id.setText(sData.getScheduleId());
+        schedule_className.setText(sData.getClassName());
+        schedule_coachId.setValue(sData.getCoachId());
+        schedule_dayOfWeek.setValue(sData.getDayOfWeek());
+        schedule_startTime.setText(sData.getStartTime().toString());
+        schedule_endTime.setText(sData.getEndTime().toString());
+        schedule_maxCapacity.setText(String.valueOf(sData.getMaxCapacity()));
+        schedule_status.setValue(sData.getStatus());
     }
 
 }
