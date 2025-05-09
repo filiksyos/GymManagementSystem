@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
@@ -86,6 +88,9 @@ public class dashboardController implements Initializable {
 
     @FXML
     private Button reports_btn;
+
+    @FXML
+    private Button admin_btn;
 
     @FXML
     private AnchorPane dashboard_form;
@@ -336,6 +341,81 @@ public class dashboardController implements Initializable {
 
     @FXML
     private AnchorPane reports_form;
+
+    @FXML
+    private AnchorPane admin_form;
+
+    @FXML
+    private TextField admin_username;
+
+    @FXML
+    private PasswordField admin_password;
+
+    @FXML
+    private TextField admin_fullName;
+
+    @FXML
+    private TextField admin_email;
+
+    @FXML
+    private ComboBox<String> admin_role;
+
+    @FXML
+    private ComboBox<String> admin_status;
+
+    @FXML
+    private Button admin_addBtn;
+
+    @FXML
+    private Button admin_updateBtn;
+
+    @FXML
+    private Button admin_deleteBtn;
+
+    @FXML
+    private Button admin_clearBtn;
+
+    @FXML
+    private TextField admin_search;
+
+    @FXML
+    private TableView<adminData> admin_tableView;
+
+    @FXML
+    private TableColumn<adminData, String> admin_col_username;
+
+    @FXML
+    private TableColumn<adminData, String> admin_col_fullName;
+
+    @FXML
+    private TableColumn<adminData, String> admin_col_email;
+
+    @FXML
+    private TableColumn<adminData, String> admin_col_role;
+
+    @FXML
+    private TableColumn<adminData, String> admin_col_status;
+
+    @FXML
+    private TableColumn<adminData, Timestamp> admin_col_lastLogin;
+
+    @FXML
+    private TableView<activityLogData> admin_logTableView;
+
+    @FXML
+    private TableColumn<activityLogData, Timestamp> log_col_timestamp;
+
+    @FXML
+    private TableColumn<activityLogData, String> log_col_username;
+
+    @FXML
+    private TableColumn<activityLogData, String> log_col_action;
+
+    @FXML
+    private TableColumn<activityLogData, String> log_col_module;
+
+    @FXML
+    private TableColumn<activityLogData, String> log_col_details;
 
     // Schedule form components
     @FXML
@@ -1639,6 +1719,7 @@ public class dashboardController implements Initializable {
             equipment_form.setVisible(false);
             schedule_form.setVisible(false);
             reports_form.setVisible(false);
+            admin_form.setVisible(false);
 
             dashboardNM();
             dashboardTC();
@@ -1653,6 +1734,7 @@ public class dashboardController implements Initializable {
             equipment_form.setVisible(false);
             schedule_form.setVisible(false);
             reports_form.setVisible(false);
+            admin_form.setVisible(false);
 
             coachGenderList();
             coachStatusList();
@@ -1666,6 +1748,7 @@ public class dashboardController implements Initializable {
             equipment_form.setVisible(false);
             schedule_form.setVisible(false);
             reports_form.setVisible(false);
+            admin_form.setVisible(false);
 
             membersShowData();
             membersGender();
@@ -1680,6 +1763,7 @@ public class dashboardController implements Initializable {
             equipment_form.setVisible(false);
             schedule_form.setVisible(false);
             reports_form.setVisible(false);
+            admin_form.setVisible(false);
 
             paymentShowData();
             paymentMemberId();
@@ -1693,6 +1777,7 @@ public class dashboardController implements Initializable {
             equipment_form.setVisible(true);
             schedule_form.setVisible(false);
             reports_form.setVisible(false);
+            admin_form.setVisible(false);
             
             equipmentStatusList();
             equipmentShowData();
@@ -1704,6 +1789,7 @@ public class dashboardController implements Initializable {
             equipment_form.setVisible(false);
             schedule_form.setVisible(true);
             reports_form.setVisible(false);
+            admin_form.setVisible(false);
             
             // Schedule functionality will be implemented later
         } else if (event.getSource() == reports_btn) {
@@ -1714,9 +1800,22 @@ public class dashboardController implements Initializable {
             equipment_form.setVisible(false);
             schedule_form.setVisible(false);
             reports_form.setVisible(true);
+            admin_form.setVisible(false);
             
             // Reports functionality will be implemented later
             initializeReportIntervals();
+        } else if (event.getSource() == admin_btn) {
+            dashboard_form.setVisible(false);
+            coaches_form.setVisible(false);
+            members_form.setVisible(false);
+            payment_Form.setVisible(false);
+            equipment_form.setVisible(false);
+            schedule_form.setVisible(false);
+            reports_form.setVisible(false);
+            admin_form.setVisible(true);
+            
+            // Admin functionality will be implemented later
+            // For now, we just show the UI with disabled buttons
         }
 
     }
