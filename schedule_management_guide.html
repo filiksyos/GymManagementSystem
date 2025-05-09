@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Schedule Management Implementation Guide</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        h1, h2, h3 { color: #333; }
+        .note { background-color: #f0f0f0; padding: 10px; border-left: 4px solid #666; margin: 10px 0; }
+        pre { background-color: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        .phase { margin-bottom: 30px; }
+    </style>
+</head>
+<body>
+    <h1>Schedule Management Implementation Guide</h1>
+    <div class="note">
+        This guide outlines the implementation steps for adding schedule management functionality to the Gym Management System.
+    </div>
+
+    <div class="phase">
+        <h2>1. Overview</h2>
+        <p>The schedule management feature will allow administrators to:</p>
+        <ul>
+            <li>Create, update, and delete class schedules</li>
+            <li>Assign coaches to classes</li>
+            <li>Manage class capacity and enrollment</li>
+            <li>Track schedule status</li>
+        </ul>
+
+        <pre class="mermaid">
+graph TD
+    A[Schedule Management] --> B[Class Schedule CRUD]
+    A --> C[Coach Assignment]
+    A --> D[Capacity Management]
+    A --> E[Status Tracking]
+    B --> F[Create Schedule]
+    B --> G[Update Schedule]
+    B --> H[Delete Schedule]
+    B --> I[View Schedules]
+    C --> J[Select Coach]
+    C --> K[View Coach Details]
+    D --> L[Set Max Capacity]
+    D --> M[Track Enrollment]
+    E --> N[Active/Inactive Status]
+    E --> O[Schedule Conflicts]
+        </pre>
+    </div>
+
+    <div class="phase">
+        <h2>2. Database Schema</h2>
+        <pre>
+CREATE TABLE schedule (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    scheduleId VARCHAR(20) UNIQUE NOT NULL,
+    className VARCHAR(50) NOT NULL,
+    coachId VARCHAR(20) NOT NULL,
+    dayOfWeek VARCHAR(10) NOT NULL,
+    startTime TIME NOT NULL,
+    endTime TIME NOT NULL,
+    maxCapacity INTEGER NOT NULL,
+    currentEnrollment INTEGER DEFAULT 0,
+    status VARCHAR(20) DEFAULT 'Active',
+    FOREIGN KEY (coachId) REFERENCES coach(coachId)
+);</pre>
+    </div>
+
+    <div class="phase">
+        <h2>3. UI Components</h2>
+        <h3>Required FXML Elements:</h3>
+        <pre>
+&lt;AnchorPane fx:id="schedule_form"&gt;
+    &lt;!-- Input Fields --&gt;
+    &lt;TextField fx:id="schedule_id" /&gt;
+    &lt;TextField fx:id="schedule_className" /&gt;
+    &lt;ComboBox fx:id="schedule_coachId" /&gt;
+    &lt;ComboBox fx:id="schedule_dayOfWeek" /&gt;
+    &lt;TextField fx:id="schedule_startTime" /&gt;
+    &lt;TextField fx:id="schedule_endTime" /&gt;
+    &lt;TextField fx:id="schedule_maxCapacity" /&gt;
+    &lt;ComboBox fx:id="schedule_status" /&gt;
+
+    &lt;!-- Buttons --&gt;
+    &lt;Button fx:id="schedule_addBtn" text="Add" /&gt;
+    &lt;Button fx:id="schedule_updateBtn" text="Update" /&gt;
+    &lt;Button fx:id="schedule_deleteBtn" text="Delete" /&gt;
+    &lt;Button fx:id="schedule_clearBtn" text="Clear" /&gt;
+
+    &lt;!-- TableView --&gt;
+    &lt;TableView fx:id="schedule_tableView"&gt;
+        &lt;columns&gt;
+            &lt;TableColumn fx:id="schedule_col_id" text="Schedule ID" /&gt;
+            &lt;TableColumn fx:id="schedule_col_className" text="Class Name" /&gt;
+            &lt;TableColumn fx:id="schedule_col_coachId" text="Coach" /&gt;
+            &lt;TableColumn fx:id="schedule_col_dayOfWeek" text="Day" /&gt;
+            &lt;TableColumn fx:id="schedule_col_timeRange" text="Time" /&gt;
+            &lt;TableColumn fx:id="schedule_col_capacity" text="Capacity" /&gt;
+            &lt;TableColumn fx:id="schedule_col_enrollment" text="Enrolled" /&gt;
+            &lt;TableColumn fx:id="schedule_col_status" text="Status" /&gt;
+        &lt;/columns&gt;
+    &lt;/TableView&gt;
+&lt;/AnchorPane&gt;</pre>
+    </div>
+
+    <div class="phase">
+        <h2>4. Implementation Steps</h2>
+        
+        <h3>4.1 Controller Methods</h3>
+        <p>Required methods in dashboardController.java:</p>
+        <ul>
+            <li>scheduleAddBtn() - Add new schedule</li>
+            <li>scheduleUpdateBtn() - Update existing schedule</li>
+            <li>scheduleDeleteBtn() - Delete schedule</li>
+            <li>scheduleClearBtn() - Clear form fields</li>
+            <li>scheduleShowData() - Display schedule data in TableView</li>
+            <li>scheduleSelect() - Handle TableView row selection</li>
+            <li>scheduleDataList() - Get schedule data from database</li>
+            <li>scheduleDayList() - Populate day of week ComboBox</li>
+            <li>scheduleStatusList() - Populate status ComboBox</li>
+            <li>scheduleCoachList() - Populate coach ComboBox</li>
+        </ul>
+
+        <h3>4.2 Data Flow</h3>
+        <pre class="mermaid">
+sequenceDiagram
+    participant UI as User Interface
+    participant C as Controller
+    participant D as Database
+    participant M as Model
+
+    UI->>C: Input Schedule Data
+    C->>C: Validate Input
+    C->>D: Save/Update Data
+    D-->>C: Confirmation
+    C->>M: Update Model
+    M-->>UI: Refresh Display</pre>
+    </div>
+
+    <div class="phase">
+        <h2>5. Validation Rules</h2>
+        <ul>
+            <li>Schedule ID must be unique</li>
+            <li>Time slots cannot overlap for the same coach</li>
+            <li>Maximum capacity must be a positive integer</li>
+            <li>End time must be after start time</li>
+            <li>Coach must be active in the system</li>
+        </ul>
+    </div>
+
+    <div class="phase">
+        <h2>6. Integration Points</h2>
+        <pre class="mermaid">
+graph LR
+    A[Schedule Management] --> B[Coach Management]
+    A --> C[Member Management]
+    B --> D[Coach Availability]
+    C --> E[Class Enrollment]
+    A --> F[Payment System]
+    A --> G[Reporting Module]</pre>
+    </div>
+
+    <div class="phase">
+        <h2>7. Testing Checklist</h2>
+        <ul>
+            <li>CRUD Operations
+                <ul>
+                    <li>Create new schedule</li>
+                    <li>Read schedule details</li>
+                    <li>Update schedule information</li>
+                    <li>Delete schedule</li>
+                </ul>
+            </li>
+            <li>Validation Tests
+                <ul>
+                    <li>Duplicate schedule ID</li>
+                    <li>Time slot conflicts</li>
+                    <li>Invalid capacity values</li>
+                    <li>Invalid time ranges</li>
+                </ul>
+            </li>
+            <li>Integration Tests
+                <ul>
+                    <li>Coach assignment</li>
+                    <li>Member enrollment</li>
+                    <li>Schedule conflicts</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true});</script>
+</body>
+</html> 

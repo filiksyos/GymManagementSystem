@@ -87,6 +87,7 @@
                               </Label>
                               <Button fx:id="payment_btn" layoutX="20.0" layoutY="324.0" mnemonicParsing="false" onAction="#switchForm" prefHeight="35.0" prefWidth="180.0" styleClass="nav-btn" stylesheets="@dashboardDesign.css" text="Payment" />
                               <Button fx:id="equipment_btn" layoutX="20.0" layoutY="370.0" mnemonicParsing="false" onAction="#switchForm" prefHeight="35.0" prefWidth="180.0" styleClass="nav-btn" stylesheets="@dashboardDesign.css" text="Equipment" />
+                              <Button fx:id="schedule_btn" layoutX="20.0" layoutY="416.0" mnemonicParsing="false" onAction="#switchForm" prefHeight="35.0" prefWidth="180.0" styleClass="nav-btn" stylesheets="@dashboardDesign.css" text="Schedule" />
                            </children>
                            <styleClass>
                               <String fx:value="nav" />
@@ -320,6 +321,91 @@
                                         <TableColumn fx:id="equipment_col_lastMaintenance" prefWidth="100.0" text="Last Maintenance" />
                                         <TableColumn fx:id="equipment_col_nextMaintenance" prefWidth="100.0" text="Next Maintenance" />
                                         <TableColumn fx:id="equipment_col_status" prefWidth="70.0" text="Status" />
+                                      </columns>
+                                    </TableView>
+                                 </children>
+                              </AnchorPane>
+                              <Separator layoutX="308.0" layoutY="18.0" orientation="VERTICAL" prefHeight="512.0" prefWidth="8.0" />
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane fx:id="schedule_form" prefHeight="555.0" prefWidth="880.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <AnchorPane layoutX="14.0" layoutY="18.0" prefHeight="520.0" prefWidth="283.0" stylesheets="@dashboardDesign.css" AnchorPane.leftAnchor="14.0">
+                                 <styleClass>
+                                    <String fx:value="white-bg" />
+                                    <String fx:value="shadow" />
+                                 </styleClass>
+                                 <children>
+                                    <Label layoutX="40.0" layoutY="37.0" text="Schedule ID:">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </Label>
+                                    <TextField fx:id="schedule_id" layoutX="140.0" layoutY="35.0" prefHeight="25.0" prefWidth="120.0" styleClass="textfield" stylesheets="@dashboardDesign.css" />
+                                    <Label layoutX="90.0" layoutY="76.0" text="Class:">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </Label>
+                                    <TextField fx:id="schedule_className" layoutX="140.0" layoutY="73.0" prefHeight="25.0" prefWidth="140.0" styleClass="textfield" stylesheets="@dashboardDesign.css" />
+                                    <Label layoutX="90.0" layoutY="116.0" text="Coach:">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </Label>
+                                    <ComboBox fx:id="schedule_coachId" layoutX="140.0" layoutY="113.0" prefHeight="25.0" prefWidth="140.0" promptText="Choose..." styleClass="textfield" stylesheets="@dashboardDesign.css" />
+                                    <Label layoutX="95.0" layoutY="157.0" text="Day:">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </Label>
+                                    <ComboBox fx:id="schedule_dayOfWeek" layoutX="140.0" layoutY="154.0" prefHeight="25.0" prefWidth="140.0" promptText="Choose..." styleClass="textfield" stylesheets="@dashboardDesign.css" />
+                                    <Label layoutX="55.0" layoutY="197.0" text="Start Time:">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </Label>
+                                    <TextField fx:id="schedule_startTime" layoutX="140.0" layoutY="194.0" prefHeight="25.0" prefWidth="140.0" promptText="HH:MM" styleClass="textfield" stylesheets="@dashboardDesign.css" />
+                                    <Label layoutX="60.0" layoutY="237.0" text="End Time:">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </Label>
+                                    <TextField fx:id="schedule_endTime" layoutX="140.0" layoutY="234.0" prefHeight="25.0" prefWidth="140.0" promptText="HH:MM" styleClass="textfield" stylesheets="@dashboardDesign.css" />
+                                    <Label layoutX="55.0" layoutY="277.0" text="Capacity:">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </Label>
+                                    <TextField fx:id="schedule_maxCapacity" layoutX="140.0" layoutY="274.0" prefHeight="25.0" prefWidth="140.0" promptText="0" styleClass="textfield" stylesheets="@dashboardDesign.css" />
+                                    <Label layoutX="80.0" layoutY="317.0" text="Status:">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </Label>
+                                    <ComboBox fx:id="schedule_status" layoutX="140.0" layoutY="314.0" prefWidth="140.0" promptText="Choose..." styleClass="textfield" stylesheets="@dashboardDesign.css" />
+                                    <Button fx:id="schedule_addBtn" layoutX="30.0" layoutY="370.0" mnemonicParsing="false" prefHeight="43.0" prefWidth="99.0" styleClass="btn" stylesheets="@dashboardDesign.css" text="Add" />
+                                    <Button fx:id="schedule_updateBtn" layoutX="153.0" layoutY="370.0" mnemonicParsing="false" prefHeight="43.0" prefWidth="99.0" styleClass="btn" stylesheets="@dashboardDesign.css" text="Update" />
+                                    <Button fx:id="schedule_resetBtn" layoutX="31.0" layoutY="430.0" mnemonicParsing="false" prefHeight="43.0" prefWidth="99.0" styleClass="btn" stylesheets="@dashboardDesign.css" text="Reset" />
+                                    <Button fx:id="schedule_deleteBtn" layoutX="153.0" layoutY="430.0" mnemonicParsing="false" prefHeight="43.0" prefWidth="99.0" styleClass="btn" stylesheets="@dashboardDesign.css" text="Delete" />
+                                 </children>
+                              </AnchorPane>
+                              <AnchorPane layoutX="324.0" layoutY="18.0" prefHeight="520.0" prefWidth="542.0" stylesheets="@dashboardDesign.css">
+                                 <styleClass>
+                                    <String fx:value="white-bg" />
+                                    <String fx:value="shadow" />
+                                 </styleClass>
+                                 <children>
+                                    <TableView fx:id="schedule_tableView" layoutX="13.0" layoutY="17.0" prefHeight="486.0" prefWidth="516.0">
+                                      <columns>
+                                        <TableColumn fx:id="schedule_col_id" prefWidth="70.0" text="Schedule ID" />
+                                        <TableColumn fx:id="schedule_col_className" prefWidth="90.0" text="Class Name" />
+                                        <TableColumn fx:id="schedule_col_coachId" prefWidth="70.0" text="Coach" />
+                                        <TableColumn fx:id="schedule_col_dayOfWeek" prefWidth="60.0" text="Day" />
+                                        <TableColumn fx:id="schedule_col_timeRange" prefWidth="90.0" text="Time" />
+                                        <TableColumn fx:id="schedule_col_capacity" prefWidth="45.0" text="Max" />
+                                        <TableColumn fx:id="schedule_col_enrollment" prefWidth="45.0" text="Current" />
+                                        <TableColumn fx:id="schedule_col_status" prefWidth="45.0" text="Status" />
                                       </columns>
                                     </TableView>
                                  </children>
