@@ -299,10 +299,10 @@
                                        </font>
                                     </Label>
                                     <ComboBox fx:id="equipment_status" layoutX="140.0" layoutY="274.0" prefWidth="140.0" promptText="Choose..." styleClass="textfield" stylesheets="@dashboardDesign.css" />
-                                    <Button fx:id="equipment_addBtn" layoutX="30.0" layoutY="350.0" mnemonicParsing="false" prefHeight="43.0" prefWidth="99.0" styleClass="btn" stylesheets="@dashboardDesign.css" text="Add" />
-                                    <Button fx:id="equipment_updateBtn" layoutX="153.0" layoutY="350.0" mnemonicParsing="false" prefHeight="43.0" prefWidth="99.0" styleClass="btn" stylesheets="@dashboardDesign.css" text="Update" />
-                                    <Button fx:id="equipment_resetBtn" layoutX="31.0" layoutY="410.0" mnemonicParsing="false" prefHeight="43.0" prefWidth="99.0" styleClass="btn" stylesheets="@dashboardDesign.css" text="Reset" />
-                                    <Button fx:id="equipment_deleteBtn" layoutX="153.0" layoutY="410.0" mnemonicParsing="false" prefHeight="43.0" prefWidth="99.0" styleClass="btn" stylesheets="@dashboardDesign.css" text="Delete" />
+                                    <Button fx:id="equipment_addBtn" layoutX="30.0" layoutY="350.0" mnemonicParsing="false" onAction="#equipmentAddBtn" prefHeight="43.0" prefWidth="99.0" styleClass="btn" stylesheets="@dashboardDesign.css" text="Add" />
+                                    <Button fx:id="equipment_updateBtn" layoutX="153.0" layoutY="350.0" mnemonicParsing="false" onAction="#equipmentUpdateBtn" prefHeight="43.0" prefWidth="99.0" styleClass="btn" stylesheets="@dashboardDesign.css" text="Update" />
+                                    <Button fx:id="equipment_resetBtn" layoutX="31.0" layoutY="410.0" mnemonicParsing="false" onAction="#equipmentClearBtn" prefHeight="43.0" prefWidth="99.0" styleClass="btn" stylesheets="@dashboardDesign.css" text="Reset" />
+                                    <Button fx:id="equipment_deleteBtn" layoutX="153.0" layoutY="410.0" mnemonicParsing="false" onAction="#equipmentDeleteBtn" prefHeight="43.0" prefWidth="99.0" styleClass="btn" stylesheets="@dashboardDesign.css" text="Delete" />
                                  </children>
                               </AnchorPane>
                               <AnchorPane layoutX="324.0" layoutY="18.0" prefHeight="520.0" prefWidth="542.0" stylesheets="@dashboardDesign.css">
@@ -311,7 +311,7 @@
                                     <String fx:value="shadow" />
                                  </styleClass>
                                  <children>
-                                    <TableView fx:id="equipment_tableView" layoutX="13.0" layoutY="17.0" prefHeight="486.0" prefWidth="516.0">
+                                    <TableView fx:id="equipment_tableView" layoutX="13.0" layoutY="17.0" onMouseClicked="#equipmentSelect" prefHeight="486.0" prefWidth="516.0">
                                       <columns>
                                         <TableColumn fx:id="equipment_col_id" prefWidth="70.0" text="Equipment ID" />
                                         <TableColumn fx:id="equipment_col_name" prefWidth="90.0" text="Name" />

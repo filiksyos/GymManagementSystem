@@ -326,6 +326,257 @@ public class dashboardController implements Initializable {
     private ResultSet result;
     private Statement statement;
 
+    private String[] equipmentStatusList = {"Working", "Maintenance", "Out of Order"};
+
+    public void equipmentStatusList() {
+        List<String> statusL = new ArrayList<>();
+        
+        for(String data: equipmentStatusList) {
+            statusL.add(data);
+        }
+        
+        ObservableList listData = FXCollections.observableArrayList(statusL);
+        equipment_status.setItems(listData);
+    }
+
+    public void equipmentAddBtn() {
+        String sql = "INSERT INTO equipment (equipmentId, name, type, purchaseDate, lastMaintenance, nextMaintenance, status) "
+                + "VALUES(?,?,?,?,?,?,?)";
+
+        connect = database.connectDb();
+
+        try {
+            Alert alert;
+
+            if (equipment_id.getText().isEmpty() || equipment_name.getText().isEmpty()
+                    || equipment_type.getText().isEmpty() 
+                    || equipment_purchaseDate.getValue() == null
+                    || equipment_lastMaintenance.getValue() == null
+                    || equipment_nextMaintenance.getValue() == null
+                    || equipment_status.getSelectionModel().getSelectedItem() == null) {
+                emptyFields();
+            } else {
+                String checkData = "SELECT equipmentId FROM equipment WHERE equipmentId = '"
+                        + equipment_id.getText() + "'";
+
+                statement = connect.createStatement();
+                result = statement.executeQuery(checkData);
+
+                if (result.next()) {
+                    alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("Error Message");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Equipment ID: " + equipment_id.getText() + " already exists!");
+                    alert.showAndWait();
+                } else {
+                    prepare = connect.prepareStatement(sql);
+                    prepare.setString(1, equipment_id.getText());
+                    prepare.setString(2, equipment_name.getText());
+                    prepare.setString(3, equipment_type.getText());
+                    prepare.setString(4, String.valueOf(equipment_purchaseDate.getValue()));
+                    prepare.setString(5, String.valueOf(equipment_lastMaintenance.getValue()));
+                    prepare.setString(6, String.valueOf(equipment_nextMaintenance.getValue()));
+                    prepare.setString(7, (String) equipment_status.getSelectionModel().getSelectedItem());
+
+                    alert = new Alert(AlertType.INFORMATION);
+                    alert.setTitle("Information Message");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Successfully Added!");
+                    alert.showAndWait();
+
+                    // Insert data
+                    prepare.executeUpdate();
+                    // Update TableView
+                    equipmentShowData();
+                    // Clear fields
+                    equipmentClearBtn();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void equipmentUpdateBtn() {
+        String sql = "UPDATE equipment SET name = '"
+                + equipment_name.getText() + "', type = '"
+                + equipment_type.getText() + "', purchaseDate = '"
+                + equipment_purchaseDate.getValue() + "', lastMaintenance = '"
+                + equipment_lastMaintenance.getValue() + "', nextMaintenance = '"
+                + equipment_nextMaintenance.getValue() + "', status = '"
+                + equipment_status.getSelectionModel().getSelectedItem() + "' WHERE equipmentId = '"
+                + equipment_id.getText() + "'";
+
+        connect = database.connectDb();
+
+        try {
+            Alert alert;
+            if (equipment_id.getText().isEmpty() || equipment_name.getText().isEmpty()
+                    || equipment_type.getText().isEmpty() 
+                    || equipment_purchaseDate.getValue() == null
+                    || equipment_lastMaintenance.getValue() == null
+                    || equipment_nextMaintenance.getValue() == null
+                    || equipment_status.getSelectionModel().getSelectedItem() == null) {
+                emptyFields();
+            } else {
+                alert = new Alert(AlertType.CONFIRMATION);
+                alert.setTitle("Confirmation Message");
+                alert.setHeaderText(null);
+                alert.setContentText("Are you sure you want to UPDATE Equipment ID: " + equipment_id.getText() + "?");
+                Optional<ButtonType> option = alert.showAndWait();
+
+                if (option.get().equals(ButtonType.OK)) {
+                    prepare = connect.prepareStatement(sql);
+                    prepare.executeUpdate();
+                    
+                    alert = new Alert(AlertType.INFORMATION);
+                    alert.setTitle("Information Message");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Successfully Updated!");
+                    alert.showAndWait();
+                    
+                    // Update TableView
+                    equipmentShowData();
+                    // Clear fields
+                    equipmentClearBtn();
+                } else {
+                    alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("Information Message");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Cancelled Update!");
+                    alert.showAndWait();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void equipmentDeleteBtn() {
+        String sql = "DELETE FROM equipment WHERE equipmentId = '"
+                + equipment_id.getText() + "'";
+
+        connect = database.connectDb();
+
+        try {
+            Alert alert;
+            if (equipment_id.getText().isEmpty() || equipment_name.getText().isEmpty()
+                    || equipment_type.getText().isEmpty() 
+                    || equipment_purchaseDate.getValue() == null
+                    || equipment_lastMaintenance.getValue() == null
+                    || equipment_nextMaintenance.getValue() == null
+                    || equipment_status.getSelectionModel().getSelectedItem() == null) {
+                emptyFields();
+            } else {
+                alert = new Alert(AlertType.CONFIRMATION);
+                alert.setTitle("Confirmation Message");
+                alert.setHeaderText(null);
+                alert.setContentText("Are you sure you want to DELETE Equipment ID: " + equipment_id.getText() + "?");
+                Optional<ButtonType> option = alert.showAndWait();
+
+                if (option.get().equals(ButtonType.OK)) {
+                    prepare = connect.prepareStatement(sql);
+                    prepare.executeUpdate();
+                    
+                    alert = new Alert(AlertType.INFORMATION);
+                    alert.setTitle("Information Message");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Successfully Deleted!");
+                    alert.showAndWait();
+                    
+                    // Update TableView
+                    equipmentShowData();
+                    // Clear fields
+                    equipmentClearBtn();
+                } else {
+                    alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("Information Message");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Cancelled Delete!");
+                    alert.showAndWait();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void equipmentClearBtn() {
+        equipment_id.setText("");
+        equipment_name.setText("");
+        equipment_type.setText("");
+        equipment_purchaseDate.setValue(null);
+        equipment_lastMaintenance.setValue(null);
+        equipment_nextMaintenance.setValue(null);
+        equipment_status.getSelectionModel().clearSelection();
+    }
+
+    public ObservableList<equipmentData> equipmentDataList() {
+        ObservableList<equipmentData> listData = FXCollections.observableArrayList();
+        
+        String sql = "SELECT * FROM equipment";
+        
+        connect = database.connectDb();
+        
+        try {
+            prepare = connect.prepareStatement(sql);
+            result = prepare.executeQuery();
+            
+            equipmentData ed;
+            
+            while(result.next()) {
+                ed = new equipmentData(
+                        result.getInt("id"),
+                        result.getString("equipmentId"),
+                        result.getString("name"),
+                        result.getString("type"),
+                        result.getDate("purchaseDate"),
+                        result.getDate("lastMaintenance"),
+                        result.getDate("nextMaintenance"),
+                        result.getString("status")
+                );
+                
+                listData.add(ed);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return listData;
+    }
+    
+    private ObservableList<equipmentData> equipmentListData;
+    
+    public void equipmentShowData() {
+        equipmentListData = equipmentDataList();
+        
+        equipment_col_id.setCellValueFactory(new PropertyValueFactory<>("equipmentId"));
+        equipment_col_name.setCellValueFactory(new PropertyValueFactory<>("name"));
+        equipment_col_type.setCellValueFactory(new PropertyValueFactory<>("type"));
+        equipment_col_purchaseDate.setCellValueFactory(new PropertyValueFactory<>("purchaseDate"));
+        equipment_col_lastMaintenance.setCellValueFactory(new PropertyValueFactory<>("lastMaintenance"));
+        equipment_col_nextMaintenance.setCellValueFactory(new PropertyValueFactory<>("nextMaintenance"));
+        equipment_col_status.setCellValueFactory(new PropertyValueFactory<>("status"));
+        
+        equipment_tableView.setItems(equipmentListData);
+    }
+    
+    public void equipmentSelect() {
+        equipmentData ed = equipment_tableView.getSelectionModel().getSelectedItem();
+        int num = equipment_tableView.getSelectionModel().getSelectedIndex();
+        
+        if ((num - 1) < -1) {
+            return;
+        }
+        
+        equipment_id.setText(ed.getEquipmentId());
+        equipment_name.setText(ed.getName());
+        equipment_type.setText(ed.getType());
+        equipment_purchaseDate.setValue(LocalDate.parse(String.valueOf(ed.getPurchaseDate())));
+        equipment_lastMaintenance.setValue(LocalDate.parse(String.valueOf(ed.getLastMaintenance())));
+        equipment_nextMaintenance.setValue(LocalDate.parse(String.valueOf(ed.getNextMaintenance())));
+    }
+
     public void emptyFields() {
         Alert alert = new Alert(AlertType.ERROR);
         alert.setTitle("Error Message");
@@ -1391,6 +1642,10 @@ public class dashboardController implements Initializable {
         paymentMemberId();
         paymentName();
         paymentShowData();
+
+        // Initialize equipment functionality
+        equipmentStatusList();
+        equipmentShowData();
 
     }
 

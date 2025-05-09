@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipment Management Implementation Guide</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3, h4 {
+            color: #0066cc;
+        }
+        .section {
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+        .highlight {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #0066cc;
+            margin-bottom: 20px;
+        }
+        .step {
+            background-color: #e6f7ff;
+            padding: 15px;
+            border-left: 4px solid #0099ff;
+            margin-bottom: 20px;
+        }
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .code-block {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+        .file-path {
+            font-weight: bold;
+            color: #0066cc;
+        }
+        .warning {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin-bottom: 20px;
+        }
+        .success {
+            background-color: #d4edda;
+            padding: 15px;
+            border-left: 4px solid #28a745;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Equipment Management Implementation Guide</h1>
+    
+    <div class="section">
+        <h2>Overview</h2>
+        <p>This guide details the implementation of the Equipment Management feature for the Gym Management System. This feature allows gym administrators to track and manage gym equipment, including maintenance schedules and status tracking.</p>
+        
+        <div class="highlight">
+            <h3>Implemented Features:</h3>
+            <ul>
+                <li>Equipment information form</li>
+                <li>Equipment listing in a table view</li>
+                <li>Add, Update, Delete, and Reset functionality</li>
+                <li>Status tracking (Working, Maintenance, Out of Order)</li>
+                <li>Maintenance date tracking</li>
+            </ul>
+        </div>
+        
+        <div class="mermaid">
+            graph TD
+                A[Equipment Tab Implementation] --> B[UI Design in dashboard.fxml]
+                A --> C[Controller Logic]
+                A --> D[Database Integration]
+                
+                B --> B1[Equipment Form]
+                B --> B2[Equipment Table]
+                
+                C --> C1[CRUD Operations]
+                C --> C2[Data Binding]
+                C --> C3[Event Handling]
+                
+                D --> D1[Equipment Table in Database]
+                D --> D2[Data Access Methods]
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Database Configuration</h2>
+        
+        <div class="step">
+            <h3>Step 1: Create Equipment Table</h3>
+            <p>Run the SQL script <span class="file-path">database/equipment_table.sql</span> to create the equipment table in your MySQL database:</p>
+            <div class="code-block">
+                -- Equipment table
+                CREATE TABLE IF NOT EXISTS `equipment` (
+                  `id` int(11) NOT NULL AUTO_INCREMENT,
+                  `equipmentId` varchar(100) NOT NULL,
+                  `name` varchar(100) NOT NULL,
+                  `type` varchar(100) NOT NULL,
+                  `purchaseDate` date DEFAULT NULL,
+                  `lastMaintenance` date DEFAULT NULL,
+                  `nextMaintenance` date DEFAULT NULL,
+                  `status` varchar(100) NOT NULL,
+                  PRIMARY KEY (`id`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+            </div>
+            <p>This script also includes sample data to get you started:</p>
+            <div class="code-block">
+                INSERT INTO `equipment` (`equipmentId`, `name`, `type`, `purchaseDate`, `lastMaintenance`, `nextMaintenance`, `status`) VALUES
+                ('EQ-101', 'Treadmill Pro 500', 'Cardio', '2022-05-15', '2022-12-10', '2023-06-10', 'Working'),
+                ('EQ-102', 'Bench Press Standard', 'Strength', '2022-03-22', '2022-11-15', '2023-05-15', 'Working'),
+                ('EQ-103', 'Leg Press Machine', 'Strength', '2022-04-10', '2022-10-20', '2023-04-20', 'Maintenance');
+            </div>
+        </div>
+        
+        <div class="step">
+            <h3>Step 2: Verify Database Connection</h3>
+            <p>Ensure that the database connection in <span class="file-path">src/gymmanagementsystem/database.java</span> is correctly set up:</p>
+            <div class="code-block">
+                public Connection connectDb() {
+                    try {
+                        Class.forName("com.mysql.jdbc.Driver");
+                        Connection connect = DriverManager.getConnection("jdbc:mysql://localhost/gym", "root", "");
+                        return connect;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                }
+            </div>
+            <p>If your database credentials are different, modify this code accordingly.</p>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Code Structure</h2>
+        
+        <h3>1. Data Model: equipmentData.java</h3>
+        <p>This class represents equipment data and provides getters and setters for all attributes:</p>
+        <div class="code-block">
+            public class equipmentData {
+                private Integer id;
+                private String equipmentId;
+                private String name;
+                private String type;
+                private Date purchaseDate;
+                private Date lastMaintenance;
+                private Date nextMaintenance;
+                private String status;
+                
+                // Constructor, getters, and setters...
+            }
+        </div>
+        
+        <h3>2. UI Definition: dashboard.fxml</h3>
+        <p>The equipment UI is defined in <span class="file-path">dashboard.fxml</span> with:</p>
+        <ul>
+            <li>A navigation button (<code>equipment_btn</code>)</li>
+            <li>A form section for entering equipment details</li>
+            <li>A table view for displaying equipment data</li>
+            <li>CRUD operation buttons with event handlers</li>
+        </ul>
+        
+        <h3>3. Controller Logic: dashboardController.java</h3>
+        <p>The controller implements all the necessary methods for equipment management:</p>
+        
+        <table>
+            <tr>
+                <th>Method</th>
+                <th>Purpose</th>
+            </tr>
+            <tr>
+                <td><code>equipmentStatusList()</code></td>
+                <td>Populates the status dropdown with options</td>
+            </tr>
+            <tr>
+                <td><code>equipmentAddBtn()</code></td>
+                <td>Adds new equipment to the database</td>
+            </tr>
+            <tr>
+                <td><code>equipmentUpdateBtn()</code></td>
+                <td>Updates existing equipment details</td>
+            </tr>
+            <tr>
+                <td><code>equipmentDeleteBtn()</code></td>
+                <td>Deletes equipment from the database</td>
+            </tr>
+            <tr>
+                <td><code>equipmentClearBtn()</code></td>
+                <td>Clears the input form fields</td>
+            </tr>
+            <tr>
+                <td><code>equipmentDataList()</code></td>
+                <td>Retrieves equipment data from the database</td>
+            </tr>
+            <tr>
+                <td><code>equipmentShowData()</code></td>
+                <td>Displays equipment data in the table view</td>
+            </tr>
+            <tr>
+                <td><code>equipmentSelect()</code></td>
+                <td>Handles table row selection</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="section">
+        <h2>Implementation Details</h2>
+        
+        <h3>1. Equipment Status Options</h3>
+        <div class="code-block">
+            private String[] equipmentStatusList = {"Working", "Maintenance", "Out of Order"};
+
+            public void equipmentStatusList() {
+                List&lt;String&gt; statusL = new ArrayList&lt;&gt;();
+                
+                for(String data: equipmentStatusList) {
+                    statusL.add(data);
+                }
+                
+                ObservableList listData = FXCollections.observableArrayList(statusL);
+                equipment_status.setItems(listData);
+            }
+        </div>
+        
+        <h3>2. CRUD Operations</h3>
+        <p>The equipment CRUD operations follow the same pattern as the existing members and coaches functionality:</p>
+        
+        <div class="highlight">
+            <h4>Add Equipment:</h4>
+            <ul>
+                <li>Validates all required fields</li>
+                <li>Checks if equipment ID already exists</li>
+                <li>Inserts new equipment record to database</li>
+                <li>Updates the table view</li>
+            </ul>
+        </div>
+        
+        <div class="highlight">
+            <h4>Update Equipment:</h4>
+            <ul>
+                <li>Validates all required fields</li>
+                <li>Confirms the update operation with the user</li>
+                <li>Updates the equipment record in the database</li>
+                <li>Refreshes the table view</li>
+            </ul>
+        </div>
+        
+        <div class="highlight">
+            <h4>Delete Equipment:</h4>
+            <ul>
+                <li>Confirms the delete operation with the user</li>
+                <li>Deletes the equipment record from the database</li>
+                <li>Refreshes the table view</li>
+            </ul>
+        </div>
+        
+        <h3>3. Table View Implementation</h3>
+        <p>The table view uses data binding to display equipment data:</p>
+        <div class="code-block">
+            public void equipmentShowData() {
+                equipmentListData = equipmentDataList();
+                
+                equipment_col_id.setCellValueFactory(new PropertyValueFactory&lt;&gt;("equipmentId"));
+                equipment_col_name.setCellValueFactory(new PropertyValueFactory&lt;&gt;("name"));
+                equipment_col_type.setCellValueFactory(new PropertyValueFactory&lt;&gt;("type"));
+                equipment_col_purchaseDate.setCellValueFactory(new PropertyValueFactory&lt;&gt;("purchaseDate"));
+                equipment_col_lastMaintenance.setCellValueFactory(new PropertyValueFactory&lt;&gt;("lastMaintenance"));
+                equipment_col_nextMaintenance.setCellValueFactory(new PropertyValueFactory&lt;&gt;("nextMaintenance"));
+                equipment_col_status.setCellValueFactory(new PropertyValueFactory&lt;&gt;("status"));
+                
+                equipment_tableView.setItems(equipmentListData);
+            }
+        </div>
+        
+        <h3>4. Table Selection Handling</h3>
+        <p>When a row is selected in the table, the data is loaded into the form fields:</p>
+        <div class="code-block">
+            public void equipmentSelect() {
+                equipmentData ed = equipment_tableView.getSelectionModel().getSelectedItem();
+                int num = equipment_tableView.getSelectionModel().getSelectedIndex();
+                
+                if ((num - 1) < -1) {
+                    return;
+                }
+                
+                equipment_id.setText(ed.getEquipmentId());
+                equipment_name.setText(ed.getName());
+                equipment_type.setText(ed.getType());
+                equipment_purchaseDate.setValue(LocalDate.parse(String.valueOf(ed.getPurchaseDate())));
+                equipment_lastMaintenance.setValue(LocalDate.parse(String.valueOf(ed.getLastMaintenance())));
+                equipment_nextMaintenance.setValue(LocalDate.parse(String.valueOf(ed.getNextMaintenance())));
+            }
+        </div>
+        
+        <h3>5. Initialization</h3>
+        <p>The equipment functionality is initialized in the <code>initialize</code> method:</p>
+        <div class="code-block">
+            @Override
+            public void initialize(URL location, ResourceBundle resources) {
+                // Existing code...
+                
+                // Initialize equipment functionality
+                equipmentStatusList();
+                equipmentShowData();
+            }
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Running and Testing</h2>
+        
+        <div class="step">
+            <h3>Step 1: Create the Equipment Table</h3>
+            <p>Run the SQL script <span class="file-path">database/equipment_table.sql</span> in your MySQL database.</p>
+        </div>
+        
+        <div class="step">
+            <h3>Step 2: Run the Application</h3>
+            <p>Build and run the Gym Management System application.</p>
+        </div>
+        
+        <div class="step">
+            <h3>Step 3: Test Equipment Management Feature</h3>
+            <ol>
+                <li>Log in to the system</li>
+                <li>Click the "Equipment" button in the sidebar</li>
+                <li>The equipment form and table should be displayed</li>
+                <li>Test adding new equipment by filling in the form and clicking "Add"</li>
+                <li>Test selecting an equipment from the table and updating its details</li>
+                <li>Test the delete functionality</li>
+                <li>Test the reset button to clear form fields</li>
+            </ol>
+        </div>
+        
+        <div class="success">
+            <h3>Expected Results</h3>
+            <p>The Equipment Management feature should now be fully functional with these capabilities:</p>
+            <ul>
+                <li>View all equipment in the table</li>
+                <li>Add new equipment to the system</li>
+                <li>Update existing equipment details</li>
+                <li>Delete equipment from the system</li>
+                <li>Track equipment status and maintenance dates</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Troubleshooting</h2>
+        
+        <div class="warning">
+            <h3>Database Connection Issues</h3>
+            <p>If you encounter database connection issues:</p>
+            <ol>
+                <li>Verify that your MySQL server is running</li>
+                <li>Check that the database connection credentials in <code>database.java</code> are correct</li>
+                <li>Ensure that the "gym" database exists</li>
+                <li>Confirm that the equipment table has been created</li>
+            </ol>
+        </div>
+        
+        <div class="warning">
+            <h3>UI Issues</h3>
+            <p>If the equipment UI doesn't display correctly:</p>
+            <ol>
+                <li>Check that all FXML IDs in <code>dashboard.fxml</code> match the field references in <code>dashboardController.java</code></li>
+                <li>Verify that the event handlers are properly connected to the UI buttons</li>
+                <li>Ensure that the equipment form's visibility is properly managed in the <code>switchForm</code> method</li>
+            </ol>
+        </div>
+        
+        <div class="warning">
+            <h3>Data Binding Issues</h3>
+            <p>If the table doesn't display data correctly:</p>
+            <ol>
+                <li>Check that the property names in the <code>CellValueFactory</code> calls match the getter methods in <code>equipmentData.java</code></li>
+                <li>Verify that the <code>equipmentDataList()</code> method is retrieving data from the database correctly</li>
+                <li>Check the console for any SQL-related exceptions</li>
+            </ol>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Next Steps</h2>
+        
+        <p>With the Equipment Management feature complete, the next steps in Phase 3 implementation would be:</p>
+        
+        <div class="highlight">
+            <h3>1. Schedule Management</h3>
+            <p>Implement the Schedule Management tab to manage class scheduling and coach assignments.</p>
+        </div>
+        
+        <div class="highlight">
+            <h3>2. Reports UI</h3>
+            <p>Implement the Reports tab for generating membership statistics, financial reports, and equipment usage metrics.</p>
+        </div>
+        
+        <div class="highlight">
+            <h3>3. Admin Management</h3>
+            <p>Implement the Admin Management tab for user account management and role assignment.</p>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose'
+        });
+    </script>
+</body>
+</html> 
