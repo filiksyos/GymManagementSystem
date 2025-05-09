@@ -73,6 +73,9 @@ public class dashboardController implements Initializable {
 
     @FXML
     private Button payment_btn;
+    
+    @FXML
+    private Button equipment_btn;
 
     @FXML
     private AnchorPane dashboard_form;
@@ -142,6 +145,67 @@ public class dashboardController implements Initializable {
 
     @FXML
     private TableColumn<coachData, String> coaches_col_status;
+    
+    // Equipment form components
+    @FXML
+    private AnchorPane equipment_form;
+    
+    @FXML
+    private TextField equipment_id;
+    
+    @FXML
+    private TextField equipment_name;
+    
+    @FXML
+    private TextField equipment_type;
+    
+    @FXML
+    private DatePicker equipment_purchaseDate;
+    
+    @FXML
+    private DatePicker equipment_lastMaintenance;
+    
+    @FXML
+    private DatePicker equipment_nextMaintenance;
+    
+    @FXML
+    private ComboBox<?> equipment_status;
+    
+    @FXML
+    private Button equipment_addBtn;
+    
+    @FXML
+    private Button equipment_updateBtn;
+    
+    @FXML
+    private Button equipment_resetBtn;
+    
+    @FXML
+    private Button equipment_deleteBtn;
+    
+    @FXML
+    private TableView<equipmentData> equipment_tableView;
+    
+    @FXML
+    private TableColumn<equipmentData, String> equipment_col_id;
+    
+    @FXML
+    private TableColumn<equipmentData, String> equipment_col_name;
+    
+    @FXML
+    private TableColumn<equipmentData, String> equipment_col_type;
+    
+    @FXML
+    private TableColumn<equipmentData, String> equipment_col_purchaseDate;
+    
+    @FXML
+    private TableColumn<equipmentData, String> equipment_col_lastMaintenance;
+    
+    @FXML
+    private TableColumn<equipmentData, String> equipment_col_nextMaintenance;
+    
+    @FXML
+    private TableColumn<equipmentData, String> equipment_col_status;
 
     @FXML
     private AnchorPane members_form;
@@ -1182,6 +1246,7 @@ public class dashboardController implements Initializable {
             coaches_form.setVisible(false);
             members_form.setVisible(false);
             payment_Form.setVisible(false);
+            equipment_form.setVisible(false);
 
             dashboardNM();
             dashboardTC();
@@ -1194,6 +1259,7 @@ public class dashboardController implements Initializable {
             coaches_form.setVisible(true);
             members_form.setVisible(false);
             payment_Form.setVisible(false);
+            equipment_form.setVisible(false);
 
             // TO UPDATE WHEN YOU CLICK THE MENU BUTTON LIKE COACHES BUTTON
             coachGenderList();
@@ -1206,6 +1272,7 @@ public class dashboardController implements Initializable {
             coaches_form.setVisible(false);
             members_form.setVisible(true);
             payment_Form.setVisible(false);
+            equipment_form.setVisible(false);
 
             membersShowData();
             membersGender();
@@ -1218,11 +1285,20 @@ public class dashboardController implements Initializable {
             coaches_form.setVisible(false);
             members_form.setVisible(false);
             payment_Form.setVisible(true);
+            equipment_form.setVisible(false);
 
             paymentShowData();
             paymentMemberId();
             paymentName();
 
+        } else if (event.getSource() == equipment_btn) {
+            dashboard_form.setVisible(false);
+            coaches_form.setVisible(false);
+            members_form.setVisible(false);
+            payment_Form.setVisible(false);
+            equipment_form.setVisible(true);
+            
+            // We'll add functionality in the next phase
         }
 
     }

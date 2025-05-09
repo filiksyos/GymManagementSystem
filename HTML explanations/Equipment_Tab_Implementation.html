@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipment Tab Implementation - Phase 3 Baby Steps</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3, h4 {
+            color: #0066cc;
+        }
+        .section {
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+        .highlight {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #0066cc;
+            margin-bottom: 20px;
+        }
+        .next-steps {
+            background-color: #e6f7ff;
+            padding: 15px;
+            border-left: 4px solid #0099ff;
+            margin-bottom: 20px;
+        }
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .file-path {
+            font-weight: bold;
+            color: #0066cc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Equipment Tab Implementation - Phase 3 Baby Steps</h1>
+    
+    <div class="section">
+        <h2>What We've Done</h2>
+        <p>We've implemented the first baby step of Phase 3 UI Expansion by adding the Equipment tab to the Gym Management System. This step was limited to creating the UI elements without any interactive functionality yet.</p>
+        
+        <div class="highlight">
+            <h3>Files Modified:</h3>
+            <ul>
+                <li><span class="file-path">dashboard.fxml</span> - Added Equipment tab button and UI form</li>
+                <li><span class="file-path">dashboardController.java</span> - Added FXML references and updated the switchForm method</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Implementation Diagram</h2>
+        
+        <div class="mermaid">
+            graph TD
+                A[dashboard.fxml] -->|Added| B[Equipment Button in Sidebar]
+                A -->|Added| C[Equipment Form AnchorPane]
+                C -->|Contains| D[Input Form]
+                C -->|Contains| E[Table View]
+                F[dashboardController.java] -->|Added| G[FXML References]
+                F -->|Updated| H[switchForm Method]
+                H -->|Handles| B
+        </div>
+        
+        <div class="highlight">
+            <h3>UI Structure:</h3>
+            <pre>
+AnchorPane (equipment_form)
+│
+├── AnchorPane (Left Panel)
+│   ├── Label + TextField (Equipment ID)
+│   ├── Label + TextField (Name)
+│   ├── Label + TextField (Type)
+│   ├── Label + DatePicker (Purchase Date)
+│   ├── Label + DatePicker (Last Maintenance)
+│   ├── Label + DatePicker (Next Maintenance)
+│   ├── Label + ComboBox (Status)
+│   └── Buttons (Add, Update, Reset, Delete)
+│
+├── Separator (Vertical)
+│
+└── AnchorPane (Right Panel)
+    └── TableView (Equipment List)
+        ├── Column (Equipment ID)
+        ├── Column (Name)
+        ├── Column (Type)
+        ├── Column (Purchase Date)
+        ├── Column (Last Maintenance)
+        ├── Column (Next Maintenance)
+        └── Column (Status)
+            </pre>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Current State</h2>
+        
+        <p>The Equipment tab is now visible in the navigation sidebar. When clicked, it displays the Equipment form, which includes:</p>
+        
+        <ul>
+            <li>Input fields for equipment details (ID, name, type)</li>
+            <li>Date pickers for purchase and maintenance dates</li>
+            <li>Status dropdown (not working yet)</li>
+            <li>Action buttons (not working yet)</li>
+            <li>Table view for displaying equipment data (empty for now)</li>
+        </ul>
+        
+        <p>However, none of these elements are currently functional. Clicking buttons will not perform any actions, and the table remains empty since no data loading functionality has been implemented.</p>
+    </div>
+    
+    <div class="section">
+        <h2>Next Steps</h2>
+        
+        <div class="next-steps">
+            <h3>Step 1: Implement Equipment Status ComboBox</h3>
+            <p>Create a method to populate the equipment status dropdown with options like "Working", "Maintenance", and "Out of Order".</p>
+            <pre><code>private String[] equipmentStatusList = {"Working", "Maintenance", "Out of Order"};
+
+public void equipmentStatusList() {
+    List&lt;String&gt; statusL = new ArrayList&lt;&gt;();
+    
+    for(String data: equipmentStatusList) {
+        statusL.add(data);
+    }
+    
+    ObservableList listData = FXCollections.observableArrayList(statusL);
+    equipment_status.setItems(listData);
+}</code></pre>
+        </div>
+        
+        <div class="next-steps">
+            <h3>Step 2: Implement Add, Update, Delete, and Reset Functions</h3>
+            <p>Create methods to handle the CRUD operations:</p>
+            <ul>
+                <li><code>equipmentAddBtn()</code> - Add new equipment to the database</li>
+                <li><code>equipmentUpdateBtn()</code> - Update existing equipment</li>
+                <li><code>equipmentDeleteBtn()</code> - Delete equipment</li>
+                <li><code>equipmentClearBtn()</code> - Clear form fields</li>
+            </ul>
+        </div>
+        
+        <div class="next-steps">
+            <h3>Step 3: Implement Data Display</h3>
+            <p>Create methods to retrieve and display equipment data in the table:</p>
+            <pre><code>public ObservableList&lt;equipmentData&gt; equipmentDataList() {
+    // Query the database and return data
+}
+
+public void equipmentShowData() {
+    // Set cell value factories and populate the table
+}</code></pre>
+        </div>
+        
+        <div class="next-steps">
+            <h3>Step 4: Implement Table Selection Handling</h3>
+            <p>Create a method to handle table row selection to load data into the form fields:</p>
+            <pre><code>public void equipmentSelect() {
+    // Handle equipment selection in TableView
+}</code></pre>
+        </div>
+        
+        <div class="next-steps">
+            <h3>Step 5: Update Initialize Method</h3>
+            <p>Add calls to the new methods in the initialize method to ensure everything is set up when the application starts:</p>
+            <pre><code>@Override
+public void initialize(URL location, ResourceBundle resources) {
+    // Existing code...
+    
+    // Add for equipment
+    equipmentStatusList();
+    equipmentShowData();
+}</code></pre>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Testing the Current Implementation</h2>
+        
+        <p>You can now run the application, and you should see:</p>
+        
+        <ol>
+            <li>The Equipment button in the navigation sidebar</li>
+            <li>Clicking the Equipment button should show the Equipment form</li>
+            <li>All UI components should be visible but not interactive</li>
+        </ol>
+        
+        <p>If any of these elements are not showing correctly, check:</p>
+        
+        <ul>
+            <li>FXML references in dashboardController.java match the fx:id values in dashboard.fxml</li>
+            <li>The equipment_form AnchorPane is properly defined</li>
+            <li>The switchForm method correctly handles the equipment_btn</li>
+        </ul>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose'
+        });
+    </script>
+</body>
+</html> 
