@@ -25,6 +25,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.AreaChart;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -79,6 +81,9 @@ public class dashboardController implements Initializable {
 
     @FXML
     private Button schedule_btn;
+
+    @FXML
+    private Button reports_btn;
 
     @FXML
     private AnchorPane dashboard_form;
@@ -327,6 +332,9 @@ public class dashboardController implements Initializable {
     @FXML
     private AnchorPane schedule_form;
 
+    @FXML
+    private AnchorPane reports_form;
+
     // Schedule form components
     @FXML
     private TextField schedule_id;
@@ -390,6 +398,61 @@ public class dashboardController implements Initializable {
     
     @FXML
     private TableColumn<scheduleData, String> schedule_col_status;
+
+    // Reports form components
+    @FXML
+    private Button report_membership;
+    
+    @FXML
+    private Button report_financial;
+    
+    @FXML
+    private Button report_equipment;
+    
+    @FXML
+    private Button report_schedule;
+    
+    @FXML
+    private Button report_coach;
+    
+    @FXML
+    private DatePicker report_startDate;
+    
+    @FXML
+    private DatePicker report_endDate;
+    
+    @FXML
+    private ComboBox<String> report_interval;
+    
+    @FXML
+    private Button report_generate;
+    
+    @FXML
+    private Button report_export;
+    
+    @FXML
+    private AreaChart<String, Number> report_trendChart;
+    
+    @FXML
+    private BarChart<String, Number> report_comparisonChart;
+    
+    @FXML
+    private PieChart report_distributionChart;
+    
+    @FXML
+    private TableView<reportData> report_detailTable;
+    
+    @FXML
+    private TableColumn<reportData, String> report_col_date;
+    
+    @FXML
+    private TableColumn<reportData, String> report_col_category;
+    
+    @FXML
+    private TableColumn<reportData, Double> report_col_value;
+    
+    @FXML
+    private TableColumn<reportData, Double> report_col_change;
 
     private Connection connect;
     private PreparedStatement prepare;
@@ -1570,6 +1633,7 @@ public class dashboardController implements Initializable {
             payment_Form.setVisible(false);
             equipment_form.setVisible(false);
             schedule_form.setVisible(false);
+            reports_form.setVisible(false);
 
             dashboardNM();
             dashboardTC();
@@ -1583,6 +1647,7 @@ public class dashboardController implements Initializable {
             payment_Form.setVisible(false);
             equipment_form.setVisible(false);
             schedule_form.setVisible(false);
+            reports_form.setVisible(false);
 
             coachGenderList();
             coachStatusList();
@@ -1595,6 +1660,7 @@ public class dashboardController implements Initializable {
             payment_Form.setVisible(false);
             equipment_form.setVisible(false);
             schedule_form.setVisible(false);
+            reports_form.setVisible(false);
 
             membersShowData();
             membersGender();
@@ -1608,6 +1674,7 @@ public class dashboardController implements Initializable {
             payment_Form.setVisible(true);
             equipment_form.setVisible(false);
             schedule_form.setVisible(false);
+            reports_form.setVisible(false);
 
             paymentShowData();
             paymentMemberId();
@@ -1620,6 +1687,7 @@ public class dashboardController implements Initializable {
             payment_Form.setVisible(false);
             equipment_form.setVisible(true);
             schedule_form.setVisible(false);
+            reports_form.setVisible(false);
             
             equipmentStatusList();
             equipmentShowData();
@@ -1630,8 +1698,20 @@ public class dashboardController implements Initializable {
             payment_Form.setVisible(false);
             equipment_form.setVisible(false);
             schedule_form.setVisible(true);
+            reports_form.setVisible(false);
             
             // Schedule functionality will be implemented later
+        } else if (event.getSource() == reports_btn) {
+            dashboard_form.setVisible(false);
+            coaches_form.setVisible(false);
+            members_form.setVisible(false);
+            payment_Form.setVisible(false);
+            equipment_form.setVisible(false);
+            schedule_form.setVisible(false);
+            reports_form.setVisible(true);
+            
+            // Reports functionality will be implemented later
+            initializeReportIntervals();
         }
 
     }
@@ -1702,6 +1782,31 @@ public class dashboardController implements Initializable {
 
     }
 
+    public void initializeReportIntervals() {
+        // Define the report intervals
+        ObservableList<String> intervals = FXCollections.observableArrayList(
+                "Daily", "Weekly", "Monthly", "Yearly"
+        );
+        
+        report_interval.setItems(intervals);
+        
+        // Set default dates (current month)
+        LocalDate now = LocalDate.now();
+        report_startDate.setValue(now.withDayOfMonth(1)); // First day of current month
+        report_endDate.setValue(now); // Current day
+        
+        // Clear any existing chart data
+        if (report_trendChart.getData() != null) {
+            report_trendChart.getData().clear();
+        }
+        if (report_comparisonChart.getData() != null) {
+            report_comparisonChart.getData().clear();
+        }
+        if (report_distributionChart.getData() != null) {
+            report_distributionChart.getData().clear();
+        }
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
@@ -1739,6 +1844,9 @@ public class dashboardController implements Initializable {
         schedule_tableView.setOnMouseClicked((MouseEvent event) -> {
             scheduleSelect();
         });
+        
+        // Initialize reports functionality
+        initializeReportIntervals();
 
     }
 
