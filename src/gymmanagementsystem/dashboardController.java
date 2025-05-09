@@ -14,11 +14,14 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -1814,8 +1817,10 @@ public class dashboardController implements Initializable {
             reports_form.setVisible(false);
             admin_form.setVisible(true);
             
-            // Admin functionality will be implemented later
-            // For now, we just show the UI with disabled buttons
+            // Initialize admin functionality
+            populateAdminRoles();
+            populateAdminStatus();
+            adminShowData();
         }
 
     }
@@ -2222,6 +2227,22 @@ public class dashboardController implements Initializable {
 
         // Initialize reports functionality
         initializeReportIntervals();
+        
+        // Initialize admin functionality
+        populateAdminRoles();
+        populateAdminStatus();
+        adminShowData();
+        
+        // Add mouse click event handler for admin table
+        admin_tableView.setOnMouseClicked((MouseEvent event) -> {
+            adminSelect();
+        });
+        
+        // Set up event handlers for admin buttons
+        admin_addBtn.setOnAction(event -> adminAddBtn());
+        admin_updateBtn.setOnAction(event -> adminUpdateBtn());
+        admin_deleteBtn.setOnAction(event -> adminDeleteBtn());
+        admin_clearBtn.setOnAction(event -> adminClearBtn());
     }
 
     // Schedule Management Methods
@@ -2487,6 +2508,566 @@ public class dashboardController implements Initializable {
         schedule_maxCapacity.setText(String.valueOf(sData.getMaxCapacity()));
         schedule_status.setValue(sData.getStatus());
     }
+
+    // Admin Management Methods
+    
+    public void adminAddBtn() {
+        String sql = "INSERT INTO admin (username, password, fullName, email, role, status, createdBy) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        
+        connect = database.connectDb();
+        
+        try {
+            Alert alert;
+            
+            // Validate all fields are filled
+            if(admin_username.getText().isEmpty() || 
+               admin_password.getText().isEmpty() || 
+               admin_fullName.getText().isEmpty() || 
+               admin_email.getText().isEmpty() ||
+               admin_role.getSelectionModel().getSelectedItem() == null ||
+               admin_status.getSelectionModel().getSelectedItem() == null) {
+                
+                alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Message");
+                alert.setHeaderText(null);
+                alert.setContentText("Please fill all fields");
+                alert.showAndWait();
+                return;
+            }
+            
+            // Check if username already exists
+            String checkUsername = "SELECT username FROM admin WHERE username = ?";
+            PreparedStatement checkPs = connect.prepareStatement(checkUsername);
+            checkPs.setString(1, admin_username.getText());
+            ResultSet checkRs = checkPs.executeQuery();
+            
+            if(checkRs.next()) {
+                alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Message");
+                alert.setHeaderText(null);
+                alert.setContentText("Username already exists");
+                alert.showAndWait();
+                return;
+            }
+            
+            // Validate password strength
+            if(!passwordUtil.isStrongPassword(admin_password.getText())) {
+                alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Message");
+                alert.setHeaderText(null);
+                alert.setContentText("Password must be at least 8 characters and include a mix of uppercase, lowercase, digits and special characters");
+                alert.showAndWait();
+                return;
+            }
+            
+            // Validate email format
+            if(!admin_email.getText().matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+                alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Message");
+                alert.setHeaderText(null);
+                alert.setContentText("Invalid email format");
+                alert.showAndWait();
+                return;
+            }
+            
+            // Prepare the insert statement
+            prepare = connect.prepareStatement(sql);
+            prepare.setString(1, admin_username.getText());
+            prepare.setString(2, passwordUtil.hashPassword(admin_password.getText()));
+            prepare.setString(3, admin_fullName.getText());
+            prepare.setString(4, admin_email.getText());
+            prepare.setString(5, admin_role.getSelectionModel().getSelectedItem());
+            prepare.setString(6, admin_status.getSelectionModel().getSelectedItem());
+            prepare.setString(7, data.username); // Current logged-in user
+            
+            // Execute the insert
+            prepare.executeUpdate();
+            
+            // Log the action
+            logActivity("Create", "Admin Management", "Created new admin user: " + admin_username.getText());
+            
+            // Show success message
+            alert = new Alert(AlertType.INFORMATION);
+            alert.setTitle("Success Message");
+            alert.setHeaderText(null);
+            alert.setContentText("Admin user added successfully");
+            alert.showAndWait();
+            
+            // Refresh the table and clear fields
+            adminShowData();
+            adminClearBtn();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Error Message");
+            alert.setHeaderText(null);
+            alert.setContentText("Error: " + e.getMessage());
+            alert.showAndWait();
+        }
+    }
+    
+    public void adminUpdateBtn() {
+        
+        // Check if user has selection
+        if(admin_tableView.getSelectionModel().getSelectedItem() == null) {
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Error Message");
+            alert.setHeaderText(null);
+            alert.setContentText("Please select an admin user to update");
+            alert.showAndWait();
+            return;
+        }
+        
+        String sql;
+        
+        // If password field is filled, update password too
+        if(!admin_password.getText().isEmpty()) {
+            sql = "UPDATE admin SET fullName = ?, email = ?, role = ?, status = ?, password = ? WHERE username = ?";
+        } else {
+            sql = "UPDATE admin SET fullName = ?, email = ?, role = ?, status = ? WHERE username = ?";
+        }
+        
+        connect = database.connectDb();
+        
+        try {
+            Alert alert;
+            
+            // Validate required fields
+            if(admin_username.getText().isEmpty() ||
+               admin_fullName.getText().isEmpty() || 
+               admin_email.getText().isEmpty() ||
+               admin_role.getSelectionModel().getSelectedItem() == null ||
+               admin_status.getSelectionModel().getSelectedItem() == null) {
+                
+                alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Message");
+                alert.setHeaderText(null);
+                alert.setContentText("Please fill all required fields");
+                alert.showAndWait();
+                return;
+            }
+            
+            // Validate email format
+            if(!admin_email.getText().matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+                alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Message");
+                alert.setHeaderText(null);
+                alert.setContentText("Invalid email format");
+                alert.showAndWait();
+                return;
+            }
+            
+            // Prevent super admin role change or deactivation if it's the last super admin
+            if(admin_username.getText().equals(data.username) && 
+               !admin_role.getSelectionModel().getSelectedItem().equals("SUPER_ADMIN") &&
+               data.userRole.equals("SUPER_ADMIN")) {
+                
+                // Count super admins
+                String countSql = "SELECT COUNT(*) FROM admin WHERE role = 'SUPER_ADMIN'";
+                Statement stmt = connect.createStatement();
+                ResultSet countRs = stmt.executeQuery(countSql);
+                
+                if(countRs.next() && countRs.getInt(1) <= 1) {
+                    alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("Error Message");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Cannot remove the last super admin role");
+                    alert.showAndWait();
+                    return;
+                }
+            }
+            
+            // Validate password if provided
+            if(!admin_password.getText().isEmpty() && 
+               !passwordUtil.isStrongPassword(admin_password.getText())) {
+                alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Message");
+                alert.setHeaderText(null);
+                alert.setContentText("Password must be at least 8 characters and include a mix of uppercase, lowercase, digits and special characters");
+                alert.showAndWait();
+                return;
+            }
+            
+            // Confirm update
+            alert = new Alert(AlertType.CONFIRMATION);
+            alert.setTitle("Confirmation Dialog");
+            alert.setHeaderText(null);
+            alert.setContentText("Are you sure you want to update this admin user?");
+            Optional<ButtonType> option = alert.showAndWait();
+            
+            if(option.get().equals(ButtonType.OK)) {
+                prepare = connect.prepareStatement(sql);
+                prepare.setString(1, admin_fullName.getText());
+                prepare.setString(2, admin_email.getText());
+                prepare.setString(3, admin_role.getSelectionModel().getSelectedItem());
+                prepare.setString(4, admin_status.getSelectionModel().getSelectedItem());
+                
+                if(!admin_password.getText().isEmpty()) {
+                    prepare.setString(5, passwordUtil.hashPassword(admin_password.getText()));
+                    prepare.setString(6, admin_username.getText());
+                } else {
+                    prepare.setString(5, admin_username.getText());
+                }
+                
+                prepare.executeUpdate();
+                
+                // Log the action
+                logActivity("Update", "Admin Management", "Updated admin user: " + admin_username.getText());
+                
+                // Show success message
+                alert = new Alert(AlertType.INFORMATION);
+                alert.setTitle("Success Message");
+                alert.setHeaderText(null);
+                alert.setContentText("Admin user updated successfully");
+                alert.showAndWait();
+                
+                // Refresh the table and clear fields
+                adminShowData();
+                adminClearBtn();
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Error Message");
+            alert.setHeaderText(null);
+            alert.setContentText("Error: " + e.getMessage());
+            alert.showAndWait();
+        }
+    }
+    
+    public void adminDeleteBtn() {
+        // Check if user has selection
+        if(admin_tableView.getSelectionModel().getSelectedItem() == null) {
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Error Message");
+            alert.setHeaderText(null);
+            alert.setContentText("Please select an admin user to delete");
+            alert.showAndWait();
+            return;
+        }
+        
+        String sql = "DELETE FROM admin WHERE username = ?";
+        
+        connect = database.connectDb();
+        
+        try {
+            String username = admin_username.getText();
+            String role = admin_tableView.getSelectionModel().getSelectedItem().getRole();
+            
+            // Prevent deletion of current user
+            if(username.equals(data.username)) {
+                Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Message");
+                alert.setHeaderText(null);
+                alert.setContentText("You cannot delete your own account");
+                alert.showAndWait();
+                return;
+            }
+            
+            // Prevent deletion of last super admin
+            if(role.equals("SUPER_ADMIN")) {
+                String countSql = "SELECT COUNT(*) FROM admin WHERE role = 'SUPER_ADMIN'";
+                Statement stmt = connect.createStatement();
+                ResultSet countRs = stmt.executeQuery(countSql);
+                
+                if(countRs.next() && countRs.getInt(1) <= 1) {
+                    Alert alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("Error Message");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Cannot delete the last super admin account");
+                    alert.showAndWait();
+                    return;
+                }
+            }
+            
+            // Confirm deletion
+            Alert alert = new Alert(AlertType.CONFIRMATION);
+            alert.setTitle("Confirmation Dialog");
+            alert.setHeaderText(null);
+            alert.setContentText("Are you sure you want to delete this admin user?");
+            Optional<ButtonType> option = alert.showAndWait();
+            
+            if(option.get().equals(ButtonType.OK)) {
+                prepare = connect.prepareStatement(sql);
+                prepare.setString(1, username);
+                prepare.executeUpdate();
+                
+                // Log the action
+                logActivity("Delete", "Admin Management", "Deleted admin user: " + username);
+                
+                // Show success message
+                alert = new Alert(AlertType.INFORMATION);
+                alert.setTitle("Success Message");
+                alert.setHeaderText(null);
+                alert.setContentText("Admin user deleted successfully");
+                alert.showAndWait();
+                
+                // Refresh the table and clear fields
+                adminShowData();
+                adminClearBtn();
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Error Message");
+            alert.setHeaderText(null);
+            alert.setContentText("Error: " + e.getMessage());
+            alert.showAndWait();
+        }
+    }
+    
+    public void adminClearBtn() {
+        admin_username.setText("");
+        admin_password.setText("");
+        admin_fullName.setText("");
+        admin_email.setText("");
+        admin_role.getSelectionModel().clearSelection();
+        admin_status.getSelectionModel().clearSelection();
+        admin_username.setEditable(true);
+    }
+    
+    public ObservableList<adminData> adminDataList() {
+        ObservableList<adminData> listData = FXCollections.observableArrayList();
+        
+        String sql = "SELECT * FROM admin ORDER BY username";
+        
+        connect = database.connectDb();
+        
+        try {
+            prepare = connect.prepareStatement(sql);
+            result = prepare.executeQuery();
+            
+            adminData adminD;
+            
+            while(result.next()) {
+                adminD = new adminData(
+                    result.getInt("id"),
+                    result.getString("username"),
+                    result.getString("fullName"),
+                    result.getString("email"),
+                    result.getString("role"),
+                    result.getString("status"),
+                    result.getTimestamp("lastLogin"),
+                    result.getString("createdBy"),
+                    result.getTimestamp("createdAt")
+                );
+                
+                listData.add(adminD);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return listData;
+    }
+    
+    private ObservableList<adminData> adminListData;
+    private FilteredList<adminData> filteredAdminData;
+    
+    public void adminShowData() {
+        adminListData = adminDataList();
+        
+        admin_col_username.setCellValueFactory(new PropertyValueFactory<>("username"));
+        admin_col_fullName.setCellValueFactory(new PropertyValueFactory<>("fullName"));
+        admin_col_email.setCellValueFactory(new PropertyValueFactory<>("email"));
+        admin_col_role.setCellValueFactory(new PropertyValueFactory<>("role"));
+        admin_col_status.setCellValueFactory(new PropertyValueFactory<>("status"));
+        admin_col_lastLogin.setCellValueFactory(new PropertyValueFactory<>("lastLogin"));
+        
+        // Create filtered list
+        filteredAdminData = new FilteredList<>(adminListData, p -> true);
+        
+        // Set up search functionality
+        admin_search.textProperty().addListener((observable, oldValue, newValue) -> {
+            filteredAdminData.setPredicate(admin -> {
+                if (newValue == null || newValue.isEmpty()) {
+                    return true;
+                }
+                
+                String searchKeyword = newValue.toLowerCase();
+                
+                // Match against username, full name, or email
+                if (admin.getUsername().toLowerCase().contains(searchKeyword)) {
+                    return true;
+                } else if (admin.getFullName().toLowerCase().contains(searchKeyword)) {
+                    return true;
+                } else if (admin.getEmail().toLowerCase().contains(searchKeyword)) {
+                    return true;
+                } else if (admin.getRole().toLowerCase().contains(searchKeyword)) {
+                    return true;
+                }
+                
+                return false;
+            });
+        });
+        
+        // Wrap the filtered list in a SortedList
+        SortedList<adminData> sortedData = new SortedList<>(filteredAdminData);
+        sortedData.comparatorProperty().bind(admin_tableView.comparatorProperty());
+        
+        // Set the table with filtered/sorted data
+        admin_tableView.setItems(sortedData);
+        
+        // Also refresh activity log data
+        adminShowLogData();
+    }
+    
+    public void adminSelect() {
+        adminData admin = admin_tableView.getSelectionModel().getSelectedItem();
+        
+        if (admin == null) {
+            return;
+        }
+        
+        admin_username.setText(admin.getUsername());
+        admin_fullName.setText(admin.getFullName());
+        admin_email.setText(admin.getEmail());
+        admin_role.getSelectionModel().select(admin.getRole());
+        admin_status.getSelectionModel().select(admin.getStatus());
+        admin_password.setText(""); // Clear for security
+        
+        // Disable username field since it's the primary key
+        admin_username.setEditable(false);
+    }
+    
+    // Activity logging methods
+    
+    public void logActivity(String action, String module, String details) {
+        String sql = "INSERT INTO activity_log (username, action, module, details) VALUES (?, ?, ?, ?)";
+        
+        connect = database.connectDb();
+        
+        try {
+            prepare = connect.prepareStatement(sql);
+            prepare.setString(1, data.username);
+            prepare.setString(2, action);
+            prepare.setString(3, module);
+            prepare.setString(4, details);
+            prepare.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public ObservableList<activityLogData> activityLogDataList() {
+        ObservableList<activityLogData> listData = FXCollections.observableArrayList();
+        
+        String sql = "SELECT * FROM activity_log ORDER BY timestamp DESC LIMIT 100";
+        
+        connect = database.connectDb();
+        
+        try {
+            prepare = connect.prepareStatement(sql);
+            result = prepare.executeQuery();
+            
+            activityLogData logData;
+            
+            while(result.next()) {
+                logData = new activityLogData(
+                    result.getInt("id"),
+                    result.getString("username"),
+                    result.getString("action"),
+                    result.getString("module"),
+                    result.getString("details"),
+                    result.getTimestamp("timestamp"),
+                    result.getString("ipAddress")
+                );
+                
+                listData.add(logData);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return listData;
+    }
+    
+    private ObservableList<activityLogData> activityLogListData;
+    
+    public void adminShowLogData() {
+        activityLogListData = activityLogDataList();
+        
+        log_col_timestamp.setCellValueFactory(new PropertyValueFactory<>("timestamp"));
+        log_col_username.setCellValueFactory(new PropertyValueFactory<>("username"));
+        log_col_action.setCellValueFactory(new PropertyValueFactory<>("action"));
+        log_col_module.setCellValueFactory(new PropertyValueFactory<>("module"));
+        log_col_details.setCellValueFactory(new PropertyValueFactory<>("details"));
+        
+        admin_logTableView.setItems(activityLogListData);
+    }
+
+    // Admin Management Methods
+    
+    private void populateAdminRoles() {
+        String sql = "SELECT roleName FROM role";
+        connect = database.connectDb();
+        
+        try {
+            List<String> roleList = new ArrayList<>();
+            prepare = connect.prepareStatement(sql);
+            result = prepare.executeQuery();
+            
+            while(result.next()) {
+                roleList.add(result.getString("roleName"));
+            }
+            
+            ObservableList<String> listData = FXCollections.observableArrayList(roleList);
+            admin_role.setItems(listData);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void populateAdminStatus() {
+        // Define status options
+        List<String> statusList = Arrays.asList("active", "inactive", "locked");
+        ObservableList<String> listData = FXCollections.observableArrayList(statusList);
+        admin_status.setItems(listData);
+    }
+    
+/*
+    public ObservableList<adminData> adminDataList() {
+        ObservableList<adminData> listData = FXCollections.observableArrayList();
+
+        String sql = "SELECT * FROM admin ORDER BY username";
+
+        connect = database.connectDb();
+
+        try {
+            prepare = connect.prepareStatement(sql);
+            result = prepare.executeQuery();
+
+            adminData adminD;
+
+            while(result.next()) {
+                adminD = new adminData(
+                    result.getInt("id"),
+                    result.getString("username"),
+                    result.getString("fullName"),
+                    result.getString("email"),
+                    result.getString("role"),
+                    result.getString("status"),
+                    result.getTimestamp("lastLogin"),
+                    result.getString("createdBy"),
+                    result.getTimestamp("createdAt")
+                );
+
+                listData.add(adminD);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return listData;
+    }
+*/
 
 }
 

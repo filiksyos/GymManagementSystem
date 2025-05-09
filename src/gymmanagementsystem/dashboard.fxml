@@ -749,10 +749,10 @@
                                     </Label>
                                     <ComboBox fx:id="admin_status" layoutX="127.0" layoutY="234.0" prefWidth="148.0" promptText="Choose..." styleClass="textfield" stylesheets="@dashboardDesign.css" />
                                     
-                                    <Button fx:id="admin_addBtn" layoutX="31.0" layoutY="280.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="99.0" styleClass="btn" stylesheets="@dashboardDesign.css" text="Add" disable="true" />
-                                    <Button fx:id="admin_updateBtn" layoutX="153.0" layoutY="280.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="99.0" styleClass="btn" stylesheets="@dashboardDesign.css" text="Update" disable="true" />
-                                    <Button fx:id="admin_deleteBtn" layoutX="31.0" layoutY="325.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="99.0" styleClass="btn" stylesheets="@dashboardDesign.css" text="Delete" disable="true" />
-                                    <Button fx:id="admin_clearBtn" layoutX="153.0" layoutY="325.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="99.0" styleClass="btn" stylesheets="@dashboardDesign.css" text="Clear" disable="true" />
+                                    <Button fx:id="admin_addBtn" layoutX="31.0" layoutY="280.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="99.0" styleClass="btn" stylesheets="@dashboardDesign.css" text="Add" />
+                                    <Button fx:id="admin_updateBtn" layoutX="153.0" layoutY="280.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="99.0" styleClass="btn" stylesheets="@dashboardDesign.css" text="Update" />
+                                    <Button fx:id="admin_deleteBtn" layoutX="31.0" layoutY="325.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="99.0" styleClass="btn" stylesheets="@dashboardDesign.css" text="Delete" />
+                                    <Button fx:id="admin_clearBtn" layoutX="153.0" layoutY="325.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="99.0" styleClass="btn" stylesheets="@dashboardDesign.css" text="Clear" />
                                  </children>
                               </AnchorPane>
                               

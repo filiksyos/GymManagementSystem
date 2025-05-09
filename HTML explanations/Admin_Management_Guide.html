@@ -17,9 +17,6 @@
         th, td { padding: 10px; text-align: left; }
         th { background-color: #f2f2f2; }
         .step-content {margin-left: 20px;}
-        .feature-diagram { margin: 20px 0; }
-        .code-example { background-color: #f8f9fa; padding: 15px; border-radius: 4px; font-family: Consolas, monospace; }
-        .screenshot { max-width: 100%; border: 1px solid #ddd; margin: 15px 0; }
     </style>
 </head>
 <body>
@@ -264,22 +261,6 @@ graph TD
     C --> C2[User TableView]
     
     D --> D1[Activity Log TableView]
-    
-    subgraph "User Form Fields"
-        UF1[Username]
-        UF2[Password]
-        UF3[Full Name]
-        UF4[Email]
-        UF5[Role Dropdown]
-        UF6[Status Dropdown]
-    end
-    
-    subgraph "Action Buttons"
-        AB1[Add Button]
-        AB2[Update Button]
-        AB3[Delete Button]
-        AB4[Clear Button]
-    end
         </pre>
         
         <h3>Main Features</h3>
@@ -299,51 +280,6 @@ graph TD
             <li>Cannot delete your own account</li>
             <li>Password strength requirements are enforced</li>
         </ul>
-    </div>
-
-    <div class="phase">
-        <h2>Implementation Workflow</h2>
-        <pre class="mermaid">
-sequenceDiagram
-    actor Admin
-    participant UI as Admin UI
-    participant Controller as Dashboard Controller
-    participant Security as Security Utilities
-    participant DB as Database
-    
-    %% Add User Flow
-    Admin->>UI: Fill in new user details
-    Admin->>UI: Click Add button
-    UI->>Controller: Call adminAddBtn()
-    Controller->>Controller: Validate inputs
-    Controller->>Security: Hash password
-    Controller->>DB: Insert new user
-    Controller->>DB: Log activity
-    Controller->>UI: Refresh UI and show message
-    
-    %% Update User Flow
-    Admin->>UI: Select user from list
-    UI->>Controller: Call adminSelect()
-    Controller->>UI: Populate form with user data
-    Admin->>UI: Modify user details
-    Admin->>UI: Click Update button
-    UI->>Controller: Call adminUpdateBtn()
-    Controller->>Controller: Validate changes
-    Controller->>DB: Update user record
-    Controller->>DB: Log activity
-    Controller->>UI: Refresh UI and show message
-    
-    %% Delete User Flow
-    Admin->>UI: Select user from list
-    UI->>Controller: Call adminSelect()
-    Controller->>UI: Populate form with user data
-    Admin->>UI: Click Delete button
-    UI->>Controller: Call adminDeleteBtn()
-    Controller->>Controller: Check deletion constraints
-    Controller->>DB: Delete user record
-    Controller->>DB: Log activity
-    Controller->>UI: Refresh UI and show message
-        </pre>
     </div>
 
     <div class="phase">
@@ -413,47 +349,6 @@ sequenceDiagram
     </div>
 
     <div class="phase">
-        <h2>Best Practices</h2>
-        <h3>Security Recommendations</h3>
-        <ul>
-            <li>Always assign the most restrictive role needed for each user</li>
-            <li>Maintain at least two super admin accounts in case one is locked out</li>
-            <li>Use strong passwords for all admin accounts</li>
-            <li>Periodically review the activity logs for suspicious activities</li>
-            <li>Deactivate accounts of users who no longer need access rather than deleting them</li>
-        </ul>
-        
-        <h3>Role Management Guidelines</h3>
-        <table>
-            <tr>
-                <th>Role</th>
-                <th>Recommended For</th>
-                <th>Access Level</th>
-            </tr>
-            <tr>
-                <td>SUPER_ADMIN</td>
-                <td>System administrators and owners</td>
-                <td>Full system access</td>
-            </tr>
-            <tr>
-                <td>ADMIN</td>
-                <td>Department heads and senior managers</td>
-                <td>Administrative control without system settings</td>
-            </tr>
-            <tr>
-                <td>MANAGER</td>
-                <td>Team leaders and shift supervisors</td>
-                <td>Day-to-day operational management</td>
-            </tr>
-            <tr>
-                <td>STAFF</td>
-                <td>Regular employees and front desk staff</td>
-                <td>Limited view-only access to common features</td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="phase">
         <h2>Technical Details</h2>
         <h3>Database Schema</h3>
         <div class="step-content">
@@ -461,7 +356,7 @@ sequenceDiagram
             
             <h4>1. admin table</h4>
             <p>Stores user account information</p>
-            <pre class="code-example">
+            <pre>
 CREATE TABLE admin (
     id int(11) NOT NULL AUTO_INCREMENT,
     username varchar(50) NOT NULL,
@@ -480,7 +375,7 @@ CREATE TABLE admin (
             
             <h4>2. role table</h4>
             <p>Stores role definitions and permissions</p>
-            <pre class="code-example">
+            <pre>
 CREATE TABLE role (
     id int(11) NOT NULL AUTO_INCREMENT,
     roleName varchar(50) NOT NULL,
@@ -493,7 +388,7 @@ CREATE TABLE role (
             
             <h4>3. activity_log table</h4>
             <p>Stores system activity for auditing</p>
-            <pre class="code-example">
+            <pre>
 CREATE TABLE activity_log (
     id int(11) NOT NULL AUTO_INCREMENT,
     username varchar(50) NOT NULL,
@@ -506,41 +401,9 @@ CREATE TABLE activity_log (
 );
             </pre>
         </div>
-        
-        <h3>Password Security Implementation</h3>
-        <div class="step-content">
-            <p>The passwordUtil class implements secure password handling using:</p>
-            <ul>
-                <li>SHA-256 hashing</li>
-                <li>Random 16-byte salts</li>
-                <li>Base64 encoding for storage</li>
-            </ul>
-            
-            <p>Password hash format: <code>base64_encoded_salt:base64_encoded_hash</code></p>
-            
-            <p>The class provides:</p>
-            <ul>
-                <li>Password hashing</li>
-                <li>Password verification</li>
-                <li>Password strength validation</li>
-                <li>Random password generation</li>
-            </ul>
-        </div>
     </div>
     
-    <div class="phase">
-        <h2>Future Enhancements</h2>
-        <ul>
-            <li>Custom role creation and permission management</li>
-            <li>Advanced filtering and reporting on activity logs</li>
-            <li>Two-factor authentication for admin accounts</li>
-            <li>Automatic account lockout after multiple failed login attempts</li>
-            <li>Password expiration and forced password changes</li>
-            <li>User-specific dashboard customization based on roles</li>
-        </ul>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
-    <script>mermaid.initialize({startOnLoad:true, theme: 'default'});</script>
+    <script>mermaid.initialize({startOnLoad:true});</script>
 </body>
 </html> 
