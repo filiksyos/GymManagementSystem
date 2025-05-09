@@ -1,0 +1,47 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Gym Management System Overview
+
+## Project Overview
+The Gym Management System is a comprehensive JavaFX application designed to help gym administrators manage members, coaches, equipment, and schedules efficiently. It features a secure authentication system, multiple user interfaces, and a relational database with CRUD operations.
+
+## Key Features
+- **Authentication System**: Secure login interface with role-based access control ([FXMLDocumentController.java](mdc:src/gymmanagementsystem/FXMLDocumentController.java))
+- **Member Management**: Registration, profile management, and membership tracking ([memberData.java](mdc:src/gymmanagementsystem/memberData.java))
+- **Coach Management**: Coach profiles and schedules ([coachData.java](mdc:src/gymmanagementsystem/coachData.java))
+- **Dashboard**: Central hub for system monitoring and navigation ([dashboardController.java](mdc:src/gymmanagementsystem/dashboardController.java))
+- **Database Operations**: Complete CRUD functionality for all system entities
+
+## Tech Stack
+- **Frontend**: JavaFX with CSS styling ([loginDesign.css](mdc:src/gymmanagementsystem/loginDesign.css), [dashboardDesign.css](mdc:src/gymmanagementsystem/dashboardDesign.css))
+- **Backend**: Java
+- **Database**: MySQL ([database.java](mdc:src/gymmanagementsystem/database.java))
+- **Project Management**: NetBeans IDE
+
+## Architecture
+The system follows the Model-View-Controller (MVC) architectural pattern:
+- **Model**: Data classes and database connections ([memberData.java](mdc:src/gymmanagementsystem/memberData.java), [coachData.java](mdc:src/gymmanagementsystem/coachData.java))
+- **View**: FXML layouts and CSS styling ([FXMLDocument.fxml](mdc:src/gymmanagementsystem/FXMLDocument.fxml), [dashboard.fxml](mdc:src/gymmanagementsystem/dashboard.fxml))
+- **Controller**: Business logic and event handling ([FXMLDocumentController.java](mdc:src/gymmanagementsystem/FXMLDocumentController.java), [dashboardController.java](mdc:src/gymmanagementsystem/dashboardController.java))
+
+## Database Structure
+The system uses a MySQL database with the following tables:
+1. **Admin**: Store user authentication data
+2. **Member**: Track gym members and their memberships
+3. **Coach**: Manage coach information and status
+(Database schema available in [gym.sql](mdc:database/gym.sql))
+
+## User Interfaces
+1. Login Screen ([FXMLDocument.fxml](mdc:src/gymmanagementsystem/FXMLDocument.fxml))
+2. Dashboard ([dashboard.fxml](mdc:src/gymmanagementsystem/dashboard.fxml))
+3. Member Management (embedded in dashboard)
+4. Coach Management (embedded in dashboard)
+5. Payment Management (embedded in dashboard)
+6. Reports and Analytics (embedded in dashboard)
+
+## Entry Point
+The application starts at [GymManagementSystem.java](mdc:src/gymmanagementsystem/GymManagementSystem.java), which loads the login interface.
+

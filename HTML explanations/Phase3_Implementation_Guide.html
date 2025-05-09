@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 3 Implementation Guide - Gym Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3, h4 {
+            color: #0066cc;
+        }
+        .section {
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+        .highlight {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #0066cc;
+            margin-bottom: 20px;
+        }
+        .warning {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .file-path {
+            font-weight: bold;
+            color: #0066cc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Phase 3 Implementation Guide - Gym Management System</h1>
+    
+    <div class="section">
+        <h2>Overview of Phase 3: UI Expansion</h2>
+        <p>Phase 3 focuses on expanding the user interface to include new functionalities for equipment management, schedule management, reports, and admin management. These additions will utilize the data models created in Phase 2 (equipmentData.java, scheduleData.java, and paymentData.java).</p>
+        
+        <div class="highlight">
+            <h3>Key Files to Modify:</h3>
+            <ul>
+                <li><span class="file-path">dashboard.fxml</span> - To add new UI tabs and components</li>
+                <li><span class="file-path">dashboardController.java</span> - To implement methods for handling the new UI components</li>
+                <li><span class="file-path">dashboardDesign.css</span> - To maintain consistent styling for new UI elements</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Classes Subject to Change in Phase 3</h2>
+        
+        <div class="mermaid">
+            graph TD
+                A[dashboard.fxml] --> B[Add new tabs & UI components]
+                C[dashboardController.java] --> D[Add FXML event handlers]
+                C --> E[Add CRUD operations for new entities]
+                C --> F[Add data binding for new tables]
+                G[dashboardDesign.css] --> H[Add styles for new components]
+        </div>
+        
+        <table>
+            <tr>
+                <th>Class</th>
+                <th>Changes Required</th>
+                <th>Complexity</th>
+            </tr>
+            <tr>
+                <td>dashboard.fxml</td>
+                <td>
+                    <ul>
+                        <li>Add four new tabs to the dashboard UI</li>
+                        <li>Create equipment management form</li>
+                        <li>Create schedule management form</li>
+                        <li>Create reports UI</li>
+                        <li>Create admin management UI</li>
+                    </ul>
+                </td>
+                <td>High</td>
+            </tr>
+            <tr>
+                <td>dashboardController.java</td>
+                <td>
+                    <ul>
+                        <li>Add FXML references for all new UI components</li>
+                        <li>Implement equipment CRUD operations</li>
+                        <li>Implement schedule management functionality</li>
+                        <li>Implement reporting functions</li>
+                        <li>Implement admin management functions</li>
+                        <li>Update switchForm() method to handle new tabs</li>
+                    </ul>
+                </td>
+                <td>High</td>
+            </tr>
+            <tr>
+                <td>dashboardDesign.css</td>
+                <td>
+                    <ul>
+                        <li>Add styling for new UI components</li>
+                        <li>Ensure consistency with existing design</li>
+                    </ul>
+                </td>
+                <td>Medium</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="section">
+        <h2>New UI Elements to be Introduced</h2>
+        
+        <h3>1. Equipment Management Tab</h3>
+        <div class="mermaid">
+            graph TD
+                A[Equipment Tab] --> B[Equipment Form]
+                A --> C[Equipment Table]
+                B --> D[Equipment Details]
+                D --> E[ID, Name, Type]
+                D --> F[Purchase Date, Maintenance]
+                C --> G[CRUD Operation Buttons]
+                C --> H[Search/Filter]
+        </div>
+        
+        <div class="highlight">
+            <h4>Equipment Management UI Elements:</h4>
+            <ul>
+                <li><strong>Button</strong>: equipment_btn (navigation button in sidebar)</li>
+                <li><strong>AnchorPane</strong>: equipment_form (main container)</li>
+                <li><strong>TextField</strong>: equipment_id, equipment_name, equipment_type</li>
+                <li><strong>DatePicker</strong>: equipment_purchaseDate, equipment_lastMaintenance, equipment_nextMaintenance</li>
+                <li><strong>ComboBox</strong>: equipment_status (Working, Maintenance, Out of Order)</li>
+                <li><strong>TableView</strong>: equipment_tableView</li>
+                <li><strong>TableColumn</strong>: Multiple columns for each field</li>
+                <li><strong>Button</strong>: equipment_addBtn, equipment_updateBtn, equipment_deleteBtn, equipment_clearBtn</li>
+                <li><strong>TextField</strong>: equipment_search</li>
+            </ul>
+        </div>
+        
+        <h3>2. Schedule Management Tab</h3>
+        <div class="mermaid">
+            graph TD
+                A[Schedule Tab] --> B[Schedule Form]
+                A --> C[Schedule Table/Calendar]
+                B --> D[Class Details]
+                D --> E[Class Name, Coach, Day]
+                D --> F[Time, Capacity, Status]
+                C --> G[Enrollment Status]
+                C --> H[Coach Assignment]
+        </div>
+        
+        <div class="highlight">
+            <h4>Schedule Management UI Elements:</h4>
+            <ul>
+                <li><strong>Button</strong>: schedule_btn (navigation button in sidebar)</li>
+                <li><strong>AnchorPane</strong>: schedule_form (main container)</li>
+                <li><strong>TextField</strong>: schedule_id, schedule_className</li>
+                <li><strong>ComboBox</strong>: schedule_coachId, schedule_dayOfWeek, schedule_status</li>
+                <li><strong>TextField/Spinner</strong>: schedule_maxCapacity</li>
+                <li><strong>TimePicker/TextField</strong>: schedule_startTime, schedule_endTime</li>
+                <li><strong>TableView</strong>: schedule_tableView</li>
+                <li><strong>TableColumn</strong>: Multiple columns for each field</li>
+                <li><strong>Button</strong>: schedule_addBtn, schedule_updateBtn, schedule_deleteBtn, schedule_clearBtn</li>
+                <li><strong>Label</strong>: schedule_enrollmentStatus</li>
+            </ul>
+        </div>
+        
+        <h3>3. Reports Tab</h3>
+        <div class="mermaid">
+            graph TD
+                A[Reports Tab] --> B[Membership Stats]
+                A --> C[Financial Reports]
+                A --> D[Attendance Reports]
+                A --> E[Equipment Usage]
+                B --> F[Charts/Tables]
+                C --> G[Income/Expense Charts]
+                D --> H[Attendance Graphs]
+                E --> I[Maintenance Alerts]
+        </div>
+        
+        <div class="highlight">
+            <h4>Reports UI Elements:</h4>
+            <ul>
+                <li><strong>Button</strong>: reports_btn (navigation button in sidebar)</li>
+                <li><strong>AnchorPane</strong>: reports_form (main container)</li>
+                <li><strong>TabPane</strong>: reports_tabPane (for different report types)</li>
+                <li><strong>AreaChart/PieChart/BarChart</strong>: Various charts for different metrics</li>
+                <li><strong>DatePicker</strong>: reports_startDate, reports_endDate (for date filtering)</li>
+                <li><strong>ComboBox</strong>: reports_type (for selecting report type)</li>
+                <li><strong>Button</strong>: reports_generateBtn, reports_exportBtn</li>
+                <li><strong>TableView</strong>: Various tables for displaying report data</li>
+            </ul>
+        </div>
+        
+        <h3>4. Admin Management Tab</h3>
+        <div class="mermaid">
+            graph TD
+                A[Admin Tab] --> B[User Account Form]
+                A --> C[User Account Table]
+                B --> D[Account Details]
+                D --> E[Username, Password, Role]
+                C --> F[Role Assignment]
+                C --> G[System Settings]
+        </div>
+        
+        <div class="highlight">
+            <h4>Admin Management UI Elements:</h4>
+            <ul>
+                <li><strong>Button</strong>: admin_btn (navigation button in sidebar)</li>
+                <li><strong>AnchorPane</strong>: admin_form (main container)</li>
+                <li><strong>TextField</strong>: admin_username, admin_email</li>
+                <li><strong>PasswordField</strong>: admin_password, admin_confirmPassword</li>
+                <li><strong>ComboBox</strong>: admin_role (Admin, Manager, Staff)</li>
+                <li><strong>TableView</strong>: admin_tableView</li>
+                <li><strong>TableColumn</strong>: Multiple columns for each field</li>
+                <li><strong>Button</strong>: admin_addBtn, admin_updateBtn, admin_deleteBtn, admin_clearBtn</li>
+                <li><strong>TitledPane</strong>: admin_settingsPane (for system settings)</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Implementation Steps</h2>
+        
+        <ol>
+            <li>
+                <h3>Update dashboard.fxml</h3>
+                <p>Add new buttons to the sidebar navigation:</p>
+                <pre><code>&lt;Button fx:id="equipment_btn" layoutX="21.0" layoutY="370.0" mnemonicParsing="false" onAction="#switchForm" 
+       prefHeight="35.0" prefWidth="180.0" styleClass="nav-btn" stylesheets="@dashboardDesign.css" text="Equipment" /&gt;
+&lt;Button fx:id="schedule_btn" layoutX="21.0" layoutY="416.0" mnemonicParsing="false" onAction="#switchForm" 
+       prefHeight="35.0" prefWidth="180.0" styleClass="nav-btn" stylesheets="@dashboardDesign.css" text="Schedule" /&gt;
+&lt;Button fx:id="reports_btn" layoutX="21.0" layoutY="462.0" mnemonicParsing="false" onAction="#switchForm" 
+       prefHeight="35.0" prefWidth="180.0" styleClass="nav-btn" stylesheets="@dashboardDesign.css" text="Reports" /&gt;
+&lt;Button fx:id="admin_btn" layoutX="21.0" layoutY="508.0" mnemonicParsing="false" onAction="#switchForm" 
+       prefHeight="35.0" prefWidth="180.0" styleClass="nav-btn" stylesheets="@dashboardDesign.css" text="Admin" /&gt;</code></pre>
+                
+                <p>Add four new AnchorPane containers for each tab:</p>
+                <pre><code>&lt;AnchorPane fx:id="equipment_form" prefHeight="555.0" prefWidth="880.0" visible="false" 
+            AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"&gt;
+    &lt;!-- Equipment management UI will go here --&gt;
+&lt;/AnchorPane&gt;
+
+&lt;AnchorPane fx:id="schedule_form" prefHeight="555.0" prefWidth="880.0" visible="false" 
+            AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"&gt;
+    &lt;!-- Schedule management UI will go here --&gt;
+&lt;/AnchorPane&gt;
+
+&lt;AnchorPane fx:id="reports_form" prefHeight="555.0" prefWidth="880.0" visible="false" 
+            AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"&gt;
+    &lt;!-- Reports UI will go here --&gt;
+&lt;/AnchorPane&gt;
+
+&lt;AnchorPane fx:id="admin_form" prefHeight="555.0" prefWidth="880.0" visible="false" 
+            AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"&gt;
+    &lt;!-- Admin management UI will go here --&gt;
+&lt;/AnchorPane&gt;</code></pre>
+            </li>
+            
+            <li>
+                <h3>Update dashboardController.java</h3>
+                <p>Add FXML references for all new UI components:</p>
+                <pre><code>// Equipment form components
+@FXML
+private AnchorPane equipment_form;
+
+@FXML
+private TextField equipment_id, equipment_name, equipment_type;
+
+@FXML
+private DatePicker equipment_purchaseDate, equipment_lastMaintenance, equipment_nextMaintenance;
+
+@FXML
+private ComboBox<?> equipment_status;
+
+@FXML
+private TableView<equipmentData> equipment_tableView;
+
+@FXML
+private TableColumn<equipmentData, String> equipment_col_id, equipment_col_name, equipment_col_type,
+        equipment_col_purchaseDate, equipment_col_lastMaintenance, equipment_col_nextMaintenance, equipment_col_status;
+
+// Schedule form components
+@FXML
+private AnchorPane schedule_form;
+
+// Similar FXML references for schedule components
+
+// Reports form components
+@FXML
+private AnchorPane reports_form;
+
+// Similar FXML references for reports components
+
+// Admin form components
+@FXML
+private AnchorPane admin_form;
+
+// Similar FXML references for admin components</code></pre>
+
+                <p>Update the switchForm method to handle the new tabs:</p>
+                <pre><code>public void switchForm(ActionEvent event) {
+    if (event.getSource() == dashboard_btn) {
+        dashboard_form.setVisible(true);
+        coaches_form.setVisible(false);
+        members_form.setVisible(false);
+        payment_Form.setVisible(false);
+        equipment_form.setVisible(false);
+        schedule_form.setVisible(false);
+        reports_form.setVisible(false);
+        admin_form.setVisible(false);
+        
+        dashboardNM();
+        dashboardTC();
+        dashboardTI();
+        dashboardChart();
+        
+    } else if (event.getSource() == coaches_btn) {
+        dashboard_form.setVisible(false);
+        coaches_form.setVisible(true);
+        members_form.setVisible(false);
+        payment_Form.setVisible(false);
+        equipment_form.setVisible(false);
+        schedule_form.setVisible(false);
+        reports_form.setVisible(false);
+        admin_form.setVisible(false);
+        
+        coachesShowData();
+        coachGenderList();
+        coachStatusList();
+        
+    } else if (event.getSource() == members_btn) {
+        // Similar handling for members tab
+    } else if (event.getSource() == payment_btn) {
+        // Similar handling for payment tab
+    } else if (event.getSource() == equipment_btn) {
+        dashboard_form.setVisible(false);
+        coaches_form.setVisible(false);
+        members_form.setVisible(false);
+        payment_Form.setVisible(false);
+        equipment_form.setVisible(true);
+        schedule_form.setVisible(false);
+        reports_form.setVisible(false);
+        admin_form.setVisible(false);
+        
+        equipmentShowData();
+        equipmentStatusList();
+        
+    } else if (event.getSource() == schedule_btn) {
+        // Similar handling for schedule tab
+    } else if (event.getSource() == reports_btn) {
+        // Similar handling for reports tab
+    } else if (event.getSource() == admin_btn) {
+        // Similar handling for admin tab
+    }
+}</code></pre>
+
+                <p>Implement CRUD operations for equipment:</p>
+                <pre><code>// Equipment status options
+private String[] equipmentStatusList = {"Working", "Maintenance", "Out of Order"};
+
+public void equipmentStatusList() {
+    List<String> statusL = new ArrayList<>();
+    
+    for(String data: equipmentStatusList) {
+        statusL.add(data);
+    }
+    
+    ObservableList listData = FXCollections.observableArrayList(statusL);
+    equipment_status.setItems(listData);
+}
+
+public void equipmentAddBtn() {
+    // Implementation for adding equipment
+}
+
+public void equipmentUpdateBtn() {
+    // Implementation for updating equipment
+}
+
+public void equipmentDeleteBtn() {
+    // Implementation for deleting equipment
+}
+
+public void equipmentClearBtn() {
+    // Implementation for clearing form fields
+}
+
+public ObservableList<equipmentData> equipmentDataList() {
+    // Implementation to retrieve equipment data from database
+}
+
+private ObservableList<equipmentData> equipmentListData;
+
+public void equipmentShowData() {
+    // Implementation to display equipment data in TableView
+}
+
+public void equipmentSelect() {
+    // Implementation to handle equipment selection in TableView
+}</code></pre>
+
+                <p>Similar implementations would be required for schedule management, reports, and admin management.</p>
+            </li>
+        </ol>
+    </div>
+    
+    <div class="section">
+        <h2>Potential Implementation Issues</h2>
+        
+        <div class="warning">
+            <h3>Database Integration Issues</h3>
+            <p>When implementing the new UI tabs, ensure that proper database access is maintained. Potential issues include:</p>
+            <ul>
+                <li><strong>Connection Management</strong>: The application may face connection pooling issues with more database operations</li>
+                <li><strong>Query Performance</strong>: Complex reports may require optimized queries to avoid UI freezing</li>
+                <li><strong>Data Integrity</strong>: Equipment and schedule data must maintain referential integrity with coach and member data</li>
+            </ul>
+        </div>
+        
+        <div class="warning">
+            <h3>UI Performance Issues</h3>
+            <p>With the addition of multiple tabs and complex UI components, performance may degrade. Consider:</p>
+            <ul>
+                <li><strong>Lazy Loading</strong>: Load data only when tabs are selected</li>
+                <li><strong>Pagination</strong>: Implement pagination for large data sets</li>
+                <li><strong>Asynchronous Operations</strong>: Use JavaFX Task or Platform.runLater() for long-running operations</li>
+            </ul>
+        </div>
+        
+        <div class="warning">
+            <h3>Code Maintainability Issues</h3>
+            <p>The dashboardController.java file may become too large and difficult to maintain. Consider:</p>
+            <ul>
+                <li><strong>Code Refactoring</strong>: Split the controller into smaller, more manageable classes</li>
+                <li><strong>Separation of Concerns</strong>: Move database operations to a separate data access layer</li>
+                <li><strong>Design Patterns</strong>: Implement the MVC pattern more strictly</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Conclusion and Next Steps</h2>
+        <p>Phase 3 involves significant UI expansion to incorporate the newly created data models from Phase 2. By following the steps outlined in this guide, you can successfully implement the four new tabs required for the Gym Management System.</p>
+        
+        <div class="highlight">
+            <h3>After Phase 3 Completion:</h3>
+            <ul>
+                <li>Test all new UI components thoroughly</li>
+                <li>Verify database integration for all CRUD operations</li>
+                <li>Check for UI responsiveness and performance</li>
+                <li>Prepare for Phase 4: Exception Handling</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose'
+        });
+    </script>
+</body>
+</html> 

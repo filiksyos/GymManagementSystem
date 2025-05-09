@@ -92,14 +92,13 @@ public class FXMLDocumentController implements Initializable {
 
     public void login() {
 
-        String sql = "SELECT * FROM admin WHERE username = ? and password = ?";
+        String sql = "SELECT * FROM admin WHERE username = ?";
 
         connect = database.connectDb();
 
         try {
             prepare = connect.prepareStatement(sql);
             prepare.setString(1, si_username.getText());
-            prepare.setString(2, si_password.getText());
             result = prepare.executeQuery();
 
             Alert alert;
@@ -112,28 +111,87 @@ public class FXMLDocumentController implements Initializable {
                 alert.showAndWait();
             } else {
                 if (result.next()) {
+                    // Get the stored password hash
+                    String storedPassword = result.getString("password");
+                    
+                    // Check if the password needs migration (not in hashed format)
+                    if (!storedPassword.contains(":")) {
+                        // Old plain text password format
+                        if (storedPassword.equals(si_password.getText())) {
+                            // Password matches, migrate to new format
+                            String hashedPassword = passwordUtil.hashPassword(si_password.getText());
+                            String updateSql = "UPDATE admin SET password = ? WHERE username = ?";
+                            PreparedStatement updatePs = connect.prepareStatement(updateSql);
+                            updatePs.setString(1, hashedPassword);
+                            updatePs.setString(2, si_username.getText());
+                            updatePs.executeUpdate();
+                            updatePs.close();
+                            
+                            // Continue with login
+                            storedPassword = hashedPassword;
+                        } else {
+                            // Wrong password
+                            alert = new Alert(AlertType.ERROR);
+                            alert.setTitle("Error Message");
+                            alert.setHeaderText(null);
+                            alert.setContentText("Wrong Username/Password");
+                            alert.showAndWait();
+                            return;
+                        }
+                    }
+                    
+                    // Verify the password using secure verification
+                    if (storedPassword.contains(":") && 
+                            passwordUtil.checkPassword(si_password.getText(), storedPassword)) {
+                        
+                        // Store user info in data class for the session
+                        data.username = si_username.getText();
+                        data.userId = result.getInt("id");
+                        data.userRole = result.getString("role");
+                        data.userFullName = result.getString("fullName");
+                        
+                        // Update last login time
+                        String updateLoginSql = "UPDATE admin SET lastLogin = CURRENT_TIMESTAMP WHERE username = ?";
+                        PreparedStatement updateLoginPs = connect.prepareStatement(updateLoginSql);
+                        updateLoginPs.setString(1, si_username.getText());
+                        updateLoginPs.executeUpdate();
+                        updateLoginPs.close();
+                        
+                        // Log the login activity
+                        String logSql = "INSERT INTO activity_log (username, action, module, details) VALUES (?, ?, ?, ?)";
+                        PreparedStatement logPs = connect.prepareStatement(logSql);
+                        logPs.setString(1, si_username.getText());
+                        logPs.setString(2, "Login");
+                        logPs.setString(3, "Authentication");
+                        logPs.setString(4, "User logged in to the system");
+                        logPs.executeUpdate();
+                        logPs.close();
 
-                    data.username = si_username.getText();
+                        alert = new Alert(AlertType.INFORMATION);
+                        alert.setTitle("Information Message");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Successfully Login!");
+                        alert.showAndWait();
 
-                    alert = new Alert(AlertType.INFORMATION);
-                    alert.setTitle("Information Message");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Successfully Login!");
-                    alert.showAndWait();
+                        si_loginBtn.getScene().getWindow().hide();
 
-                    si_loginBtn.getScene().getWindow().hide();
+                        // LINK YOUR DASHBOARD FORM 
+                        Parent root = FXMLLoader.load(getClass().getResource("dashboard.fxml"));
 
-                    // LINK YOUR DASHBOARD FORM 
-                    Parent root = FXMLLoader.load(getClass().getResource("dashboard.fxml"));
+                        Stage stage = new Stage();
+                        Scene scene = new Scene(root);
 
-                    Stage stage = new Stage();
-                    Scene scene = new Scene(root);
+                        stage.initStyle(StageStyle.TRANSPARENT);
 
-                    stage.initStyle(StageStyle.TRANSPARENT);
-
-                    stage.setScene(scene);
-                    stage.show();
-
+                        stage.setScene(scene);
+                        stage.show();
+                    } else {
+                        alert = new Alert(AlertType.ERROR);
+                        alert.setTitle("Error Message");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Wrong Username/Password");
+                        alert.showAndWait();
+                    }
                 } else {
                     alert = new Alert(AlertType.ERROR);
                     alert.setTitle("Error Message");
@@ -146,12 +204,11 @@ public class FXMLDocumentController implements Initializable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     public void signup() {
 
-        String sql = "INSERT INTO admin (email, username, password) VALUES(?,?,?)";
+        String sql = "INSERT INTO admin (email, username, password, fullName, role, status, createdBy) VALUES(?,?,?,?,?,?,?)";
 
         connect = database.connectDb();
 
@@ -166,36 +223,76 @@ public class FXMLDocumentController implements Initializable {
                 alert.setContentText("Please fill all blank fields");
                 alert.showAndWait();
             } else {
-                if (su_password.getText().length() < 8) {
+                // Validate password strength
+                if (!passwordUtil.isStrongPassword(su_password.getText())) {
                     alert = new Alert(AlertType.ERROR);
                     alert.setTitle("Error Message");
                     alert.setHeaderText(null);
-                    alert.setContentText("Invalid password :3");
+                    alert.setContentText("Password must be at least 8 characters long and contain a mix of uppercase, lowercase, digits, and special characters.");
                     alert.showAndWait();
                 } else {
-                    prepare = connect.prepareStatement(sql);
-                    prepare.setString(1, su_email.getText());
-                    prepare.setString(2, su_username.getText());
-                    prepare.setString(3, su_password.getText());
+                    // Check if username already exists
+                    String checkUser = "SELECT username FROM admin WHERE username = ?";
+                    PreparedStatement checkPs = connect.prepareStatement(checkUser);
+                    checkPs.setString(1, su_username.getText());
+                    ResultSet checkResult = checkPs.executeQuery();
+                    
+                    if (checkResult.next()) {
+                        alert = new Alert(AlertType.ERROR);
+                        alert.setTitle("Error Message");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Username already exists. Please choose a different username.");
+                        alert.showAndWait();
+                    } else {
+                        // Hash the password
+                        String hashedPassword = passwordUtil.hashPassword(su_password.getText());
+                        
+                        prepare = connect.prepareStatement(sql);
+                        prepare.setString(1, su_email.getText());
+                        prepare.setString(2, su_username.getText());
+                        prepare.setString(3, hashedPassword);
+                        prepare.setString(4, su_username.getText()); // Use username as fullName by default
+                        prepare.setString(5, "STAFF"); // Default role
+                        prepare.setString(6, "active"); // Default status
+                        prepare.setString(7, "self-registration"); // Created by
+                        
+                        // Insert the new user
+                        prepare.executeUpdate();
+                        
+                        // Log the signup activity
+                        String logSql = "INSERT INTO activity_log (username, action, module, details) VALUES (?, ?, ?, ?)";
+                        PreparedStatement logPs = connect.prepareStatement(logSql);
+                        logPs.setString(1, su_username.getText());
+                        logPs.setString(2, "Registration");
+                        logPs.setString(3, "Authentication");
+                        logPs.setString(4, "New user account created");
+                        logPs.executeUpdate();
+                        logPs.close();
 
-                    alert = new Alert(AlertType.INFORMATION);
-                    alert.setTitle("Information Message");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Successfully create new account!");
-                    alert.showAndWait();
+                        alert = new Alert(AlertType.INFORMATION);
+                        alert.setTitle("Information Message");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Account created successfully! You can now login.");
+                        alert.showAndWait();
 
-                    prepare.executeUpdate();
-
-                    su_email.setText("");
-                    su_username.setText("");
-                    su_password.setText("");
+                        su_email.setText("");
+                        su_username.setText("");
+                        su_password.setText("");
+                        
+                        // Switch to login form
+                        signupSlider();
+                    }
                 }
             }
 
         } catch (Exception e) {
             e.printStackTrace();
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Error Message");
+            alert.setHeaderText(null);
+            alert.setContentText("Error: " + e.getMessage());
+            alert.showAndWait();
         }
-
     }
 
     public void signupSlider() {

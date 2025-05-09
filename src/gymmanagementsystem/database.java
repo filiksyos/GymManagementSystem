@@ -8,11 +8,6 @@ package gymmanagementsystem;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
-/**
- *
- * @author MarcoMan
- * Subscribe our YouTube Channel: https://www.youtube.com/@marcomanchannel
- */
 public class database {
 
     public static Connection connectDb() {

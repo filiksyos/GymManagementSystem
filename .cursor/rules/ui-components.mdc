@@ -1,0 +1,95 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# UI Components and Design
+
+## Overview
+The Gym Management System features a modern JavaFX user interface with custom styling. The UI is divided into two main components: the login screen and the dashboard interface.
+
+## Login Screen
+The login interface is defined in [FXMLDocument.fxml](mdc:src/gymmanagementsystem/FXMLDocument.fxml) and styled with [loginDesign.css](mdc:src/gymmanagementsystem/loginDesign.css).
+
+Key components:
+- Username and password fields
+- Login button
+- Registration option
+- Minimize and close buttons
+
+The login functionality is controlled by [FXMLDocumentController.java](mdc:src/gymmanagementsystem/FXMLDocumentController.java).
+
+## Dashboard
+The main dashboard interface is defined in [dashboard.fxml](mdc:src/gymmanagementsystem/dashboard.fxml) and styled with [dashboardDesign.css](mdc:src/gymmanagementsystem/dashboardDesign.css).
+
+The dashboard consists of:
+1. A sidebar navigation menu
+2. A main content area with multiple tabs/forms:
+   - Dashboard overview (statistics)
+   - Members management
+   - Coaches management
+   - Payment tracking
+
+All dashboard functionality is controlled by [dashboardController.java](mdc:src/gymmanagementsystem/dashboardController.java).
+
+## Key UI Elements
+
+### Dashboard Overview
+- Total member count
+- Total coach count
+- Income statistics
+- Data visualization charts
+
+### Member Management
+- Member information form
+- Data table for viewing members
+- CRUD operation buttons
+- Search and filter options
+
+### Coach Management
+- Coach information form
+- Data table for viewing coaches
+- CRUD operation buttons
+- Search and filter options
+
+### Payment System
+- Payment form
+- Payment history table
+- Payment status tracking
+
+## Styling Guidelines
+The application uses custom CSS for styling UI components. Key styling aspects include:
+
+1. **Color Scheme**:
+   - Primary colors: Blue, white
+   - Accent colors: Various shades of blue and gray
+   - Status indicators: Green (active), red (inactive)
+
+2. **Typography**:
+   - Sans-serif fonts for modern appearance
+   - Clear hierarchy with different sizes for headings, labels, and content
+
+3. **Components**:
+   - Custom styled buttons with hover effects
+   - Modern form fields with validation styling
+   - Clean, organized tables for data display
+   - Card-like sections for content organization
+
+4. **Responsiveness**:
+   - Layouts designed to adapt to different window sizes
+   - Scrollable areas for handling large data sets
+
+## UI Navigation Flow
+1. Application starts at the login screen
+2. Upon successful authentication, the user is directed to the dashboard
+3. The sidebar menu allows navigation between different sections
+4. Each section maintains its state independently
+
+## Custom Controls
+The application uses JavaFX's built-in controls enhanced with custom styling, including:
+- TableView for data tables
+- TextField and PasswordField for input
+- ComboBox for dropdown selections
+- DatePicker for date selection
+- Charts for data visualization
+

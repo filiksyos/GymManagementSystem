@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gym Management System Documentation</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .mermaid {
+            margin: 20px 0;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gym Management System Documentation</h1>
+
+    <div class="section">
+        <h2>1. Application Lifecycle</h2>
+        <div class="mermaid">
+            graph TD
+                A[Application Start] --> B[GymManagementSystem.java]
+                B --> C[Load FXMLDocument.fxml]
+                C --> D[Initialize Login Screen]
+                D --> E[User Authentication]
+                E --> F[Load Dashboard.fxml]
+                F --> G[Initialize Dashboard Controller]
+                G --> H[Application Running]
+        </div>
+        <p>The application follows a typical JavaFX lifecycle:</p>
+        <ul>
+            <li>The application starts with <code>GymManagementSystem.java</code> as the entry point</li>
+            <li>Initial FXML document is loaded (login screen)</li>
+            <li>After successful authentication, the dashboard is loaded</li>
+            <li>The application remains running until explicitly closed</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>2. Component Interaction</h2>
+        <div class="mermaid">
+            graph LR
+                A[FXML Views] --> B[Controllers]
+                B --> C[Data Models]
+                C --> D[Database]
+                B --> E[CSS Styling]
+                A --> E
+        </div>
+        <p>Key components and their interactions:</p>
+        <ul>
+            <li><strong>FXML Views</strong>: Define the UI layout (FXMLDocument.fxml, dashboard.fxml)</li>
+            <li><strong>Controllers</strong>: Handle user interactions (FXMLDocumentController.java, dashboardController.java)</li>
+            <li><strong>Data Models</strong>: Manage data (memberData.java, coachData.java)</li>
+            <li><strong>Database</strong>: Stores persistent data (database.java)</li>
+            <li><strong>CSS</strong>: Handles styling (loginDesign.css, dashboardDesign.css)</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>3. Database Interaction</h2>
+        <div class="mermaid">
+            graph TD
+                A[Java Classes] --> B[database.java]
+                B --> C[SQL Database]
+                D[memberData.java] --> B
+                E[coachData.java] --> B
+        </div>
+        <p>Database interaction flow:</p>
+        <ul>
+            <li>The <code>database.java</code> class serves as the database connector</li>
+            <li>Data model classes (memberData.java, coachData.java) use the database class to perform CRUD operations</li>
+            <li>SQL queries are executed through JDBC (Java Database Connectivity)</li>
+            <li>Results are mapped to Java objects for use in the application</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>4. UI and Core Code Interaction</h2>
+        <div class="mermaid">
+            graph TD
+                A[FXML Views] --> B[Controllers]
+                B --> C[Event Handlers]
+                C --> D[Data Operations]
+                D --> E[UI Updates]
+                E --> A
+        </div>
+        <p>UI and core code interaction:</p>
+        <ul>
+            <li>FXML files define the UI structure</li>
+            <li>Controllers contain event handlers for user interactions</li>
+            <li>Event handlers trigger data operations</li>
+            <li>Results are reflected back in the UI through JavaFX properties and bindings</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>5. Authentication and Roles</h2>
+        <div class="mermaid">
+            graph TD
+                A[Login Screen] --> B{Authentication}
+                B -->|Success| C[Role Check]
+                C -->|Admin| D[Admin Dashboard]
+                C -->|Member| E[Member Dashboard]
+                C -->|Coach| F[Coach Dashboard]
+                B -->|Failure| A
+        </div>
+        <p>Authentication and role management:</p>
+        <ul>
+            <li>The system uses a login-based authentication system</li>
+            <li>Roles are managed through the database</li>
+            <li>Different dashboards and permissions are provided based on user roles</li>
+            <li>Session management is handled through the application controllers</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Key Differences from Android/Kotlin</h2>
+        <ul>
+            <li>JavaFX uses FXML instead of XML layouts</li>
+            <li>Controllers are explicitly defined and linked to FXML files</li>
+            <li>Event handling is done through Java methods rather than Kotlin lambdas</li>
+            <li>UI updates are managed through JavaFX properties instead of LiveData</li>
+            <li>Database operations use JDBC instead of Room</li>
+        </ul>
+    </div>
+</body>
+</html> 

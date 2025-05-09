@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 2: Data Models Implementation - Gym Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        h1, h2, h3, h4 {
+            color: #2c3e50;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+        h1 {
+            font-size: 2.5em;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            font-size: 2em;
+            border-bottom: 1px solid #3498db;
+            padding-bottom: 5px;
+        }
+        h3 {
+            font-size: 1.5em;
+        }
+        h4 {
+            font-size: 1.2em;
+        }
+        p {
+            margin: 1em 0;
+        }
+        ul, ol {
+            margin: 1em 0;
+            padding-left: 2em;
+        }
+        li {
+            margin-bottom: 0.5em;
+        }
+        code {
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+            background-color: #f1f1f1;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        .file-path {
+            color: #2980b9;
+            font-weight: bold;
+        }
+        .method-name {
+            color: #27ae60;
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+        }
+        .property {
+            margin-left: 2em;
+            display: block;
+        }
+        .property-name {
+            color: #e74c3c;
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+        }
+        .property-type {
+            color: #8e44ad;
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+        }
+        .card {
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .steps {
+            background-color: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .steps ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .steps li {
+            margin-bottom: 10px;
+        }
+        .next-phase {
+            background-color: #f0fff0;
+            border-left: 4px solid #27ae60;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .next-phase ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Phase 2: Data Models Implementation - Complete</h1>
+        <p>For Phase 2 of the Gym Management System project, we have created the necessary data model classes to support the new database tables introduced in Phase 1.</p>
+    </div>
+
+    <div class="card">
+        <h2>Completed Components</h2>
+
+        <h3>1. Data Model Classes</h3>
+        <p>We have implemented the following data model classes:</p>
+
+        <h4>1.1. EquipmentData Class</h4>
+        <ul>
+            <li><span class="file-path">File: src/gymmanagementsystem/equipmentData.java</span></li>
+            <li>Description: Represents equipment items in the gym</li>
+            <li>Properties:
+                <ul>
+                    <li class="property"><span class="property-name">id</span> (<span class="property-type">Integer</span>)</li>
+                    <li class="property"><span class="property-name">equipmentId</span> (<span class="property-type">String</span>)</li>
+                    <li class="property"><span class="property-name">name</span> (<span class="property-type">String</span>)</li>
+                    <li class="property"><span class="property-name">type</span> (<span class="property-type">String</span>)</li>
+                    <li class="property"><span class="property-name">purchaseDate</span> (<span class="property-type">Date</span>)</li>
+                    <li class="property"><span class="property-name">lastMaintenance</span> (<span class="property-type">Date</span>)</li>
+                    <li class="property"><span class="property-name">nextMaintenance</span> (<span class="property-type">Date</span>)</li>
+                    <li class="property"><span class="property-name">status</span> (<span class="property-type">String</span>)</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>1.2. ScheduleData Class</h4>
+        <ul>
+            <li><span class="file-path">File: src/gymmanagementsystem/scheduleData.java</span></li>
+            <li>Description: Represents class schedules</li>
+            <li>Properties:
+                <ul>
+                    <li class="property"><span class="property-name">id</span> (<span class="property-type">Integer</span>)</li>
+                    <li class="property"><span class="property-name">scheduleId</span> (<span class="property-type">String</span>)</li>
+                    <li class="property"><span class="property-name">className</span> (<span class="property-type">String</span>)</li>
+                    <li class="property"><span class="property-name">coachId</span> (<span class="property-type">String</span>)</li>
+                    <li class="property"><span class="property-name">dayOfWeek</span> (<span class="property-type">String</span>)</li>
+                    <li class="property"><span class="property-name">startTime</span> (<span class="property-type">Time</span>)</li>
+                    <li class="property"><span class="property-name">endTime</span> (<span class="property-type">Time</span>)</li>
+                    <li class="property"><span class="property-name">maxCapacity</span> (<span class="property-type">Integer</span>)</li>
+                    <li class="property"><span class="property-name">currentEnrollment</span> (<span class="property-type">Integer</span>)</li>
+                    <li class="property"><span class="property-name">status</span> (<span class="property-type">String</span>)</li>
+                </ul>
+            </li>
+            <li>Additional methods:
+                <ul>
+                    <li class="property"><span class="method-name">isFull()</span> - Checks if class has reached capacity</li>
+                    <li class="property"><span class="method-name">getAvailableSlots()</span> - Returns number of available slots</li>
+                    <li class="property"><span class="method-name">getTimeRange()</span> - Returns formatted time range</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>1.3. PaymentData Class</h4>
+        <ul>
+            <li><span class="file-path">File: src/gymmanagementsystem/paymentData.java</span></li>
+            <li>Description: Represents payment transactions</li>
+            <li>Properties:
+                <ul>
+                    <li class="property"><span class="property-name">id</span> (<span class="property-type">Integer</span>)</li>
+                    <li class="property"><span class="property-name">paymentId</span> (<span class="property-type">String</span>)</li>
+                    <li class="property"><span class="property-name">memberId</span> (<span class="property-type">String</span>)</li>
+                    <li class="property"><span class="property-name">amount</span> (<span class="property-type">Double</span>)</li>
+                    <li class="property"><span class="property-name">paymentDate</span> (<span class="property-type">Date</span>)</li>
+                    <li class="property"><span class="property-name">paymentMethod</span> (<span class="property-type">String</span>)</li>
+                    <li class="property"><span class="property-name">description</span> (<span class="property-type">String</span>)</li>
+                </ul>
+            </li>
+            <li>Additional methods:
+                <ul>
+                    <li class="property"><span class="method-name">getFormattedAmount()</span> - Returns amount formatted as currency</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3>2. Data Access Class</h3>
+        <p>We've created a comprehensive data access class to handle database operations for the new entities:</p>
+
+        <h4>2.1. DataAccess Class</h4>
+        <ul>
+            <li><span class="file-path">File: src/gymmanagementsystem/dataAccess.java</span></li>
+            <li>Description: Handles database operations for equipment, schedules, and payments</li>
+            <li>Methods implemented:
+                <ul>
+                    <li>Equipment operations:
+                        <ul>
+                            <li class="property"><span class="method-name">getAllEquipment()</span></li>
+                            <li class="property"><span class="method-name">addEquipment()</span></li>
+                            <li class="property"><span class="method-name">updateEquipment()</span></li>
+                            <li class="property"><span class="method-name">deleteEquipment()</span></li>
+                            <li class="property"><span class="method-name">generateEquipmentId()</span></li>
+                        </ul>
+                    </li>
+                    <li>Schedule operations:
+                        <ul>
+                            <li class="property"><span class="method-name">getAllSchedules()</span></li>
+                            <li class="property"><span class="method-name">addSchedule()</span></li>
+                            <li class="property"><span class="method-name">updateSchedule()</span></li>
+                            <li class="property"><span class="method-name">deleteSchedule()</span></li>
+                            <li class="property"><span class="method-name">generateScheduleId()</span></li>
+                            <li class="property"><span class="method-name">getSchedulesByCoach()</span></li>
+                        </ul>
+                    </li>
+                    <li>Payment operations:
+                        <ul>
+                            <li class="property"><span class="method-name">getAllPayments()</span></li>
+                            <li class="property"><span class="method-name">addPayment()</span></li>
+                            <li class="property"><span class="method-name">updatePayment()</span></li>
+                            <li class="property"><span class="method-name">deletePayment()</span></li>
+                            <li class="property"><span class="method-name">generatePaymentId()</span></li>
+                            <li class="property"><span class="method-name">getPaymentsByMember()</span></li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <div class="next-phase card">
+        <h2>Next Steps - Phase 3: UI Expansion</h2>
+        <p>Now that we have completed the data models and database access classes, the next phase involves expanding the UI to include:</p>
+
+        <h3>1. Equipment Management UI</h3>
+        <ul>
+            <li>Add a new tab in the dashboard for equipment management</li>
+            <li>Implement forms for adding/editing equipment</li>
+            <li>Create a table view to display equipment data</li>
+            <li>Add search and filter functionality</li>
+        </ul>
+
+        <h3>2. Schedule Management UI</h3>
+        <ul>
+            <li>Add a new tab for schedule management</li>
+            <li>Implement class scheduling functionality</li>
+            <li>Create views for enrollment tracking</li>
+            <li>Add coach assignment capabilities</li>
+        </ul>
+
+        <h3>3. Reports UI</h3>
+        <ul>
+            <li>Add a new tab for generating reports</li>
+            <li>Implement membership statistics</li>
+            <li>Create financial report views</li>
+            <li>Add attendance tracking features</li>
+        </ul>
+
+        <h3>4. Admin Management UI</h3>
+        <ul>
+            <li>Add a user account management tab</li>
+            <li>Implement role assignment functionality</li>
+            <li>Create system settings views</li>
+        </ul>
+    </div>
+
+    <div class="steps card">
+        <h2>Implementation Plan for Phase 3</h2>
+        <ol>
+            <li>Modify <code>dashboard.fxml</code> to add new tabs</li>
+            <li>Update <code>dashboardController.java</code> to handle new UI components</li>
+            <li>Implement event handlers for UI interactions</li>
+            <li>Connect UI components to data access methods</li>
+            <li>Test all new functionality</li>
+        </ol>
+    </div>
+</body>
+</html> 
