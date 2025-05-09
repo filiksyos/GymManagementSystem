@@ -27,6 +27,39 @@ public class reportData {
         this.change = change;
         this.trend = trend;
     }
+    
+    // Simplified constructor for basic reporting
+    public reportData(LocalDate date, String category, double value) {
+        this.date = date;
+        this.category = category;
+        this.value = value;
+        this.change = 0.0;
+        this.trend = "stable";
+        this.metric = "count";
+    }
+
+    // Constructor specifically for financial reports
+    public reportData(LocalDate date, String category, double value, double change) {
+        this.date = date;
+        this.category = category;
+        this.value = value;
+        this.change = change;
+        
+        if (change > 0) {
+            this.trend = "up";
+        } else if (change < 0) {
+            this.trend = "down";
+        } else {
+            this.trend = "stable";
+        }
+        
+        this.metric = "amount";
+    }
+
+    @Override
+    public String toString() {
+        return date + " - " + category + ": " + value + " (" + change + "%)";
+    }
 
     public LocalDate getDate() {
         return date;

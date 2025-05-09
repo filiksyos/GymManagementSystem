@@ -44,6 +44,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 
 /**
  *
@@ -462,6 +464,9 @@ public class dashboardController implements Initializable {
     private String[] equipmentStatusList = {"Working", "Maintenance", "Out of Order"};
     private String[] daysList = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
     private String[] scheduleStatusList = {"Active", "Cancelled", "Full"};
+
+    // Add an attribute to track the current report type
+    private String currentReportType = "Membership";
 
     public void equipmentStatusList() {
         List<String> statusL = new ArrayList<>();
@@ -1789,6 +1794,7 @@ public class dashboardController implements Initializable {
         );
         
         report_interval.setItems(intervals);
+        report_interval.getSelectionModel().select("Monthly");
         
         // Set default dates (current month)
         LocalDate now = LocalDate.now();
@@ -1804,6 +1810,276 @@ public class dashboardController implements Initializable {
         }
         if (report_distributionChart.getData() != null) {
             report_distributionChart.getData().clear();
+        }
+        
+        // Configure cell factories for the table columns
+        report_col_date.setCellValueFactory(cellData -> {
+            LocalDate date = cellData.getValue().getDate();
+            return new SimpleStringProperty(date.toString());
+        });
+        
+        report_col_category.setCellValueFactory(cellData -> {
+            return new SimpleStringProperty(cellData.getValue().getCategory());
+        });
+        
+        report_col_value.setCellValueFactory(cellData -> {
+            return new SimpleObjectProperty<>(cellData.getValue().getValue());
+        });
+        
+        report_col_change.setCellValueFactory(cellData -> {
+            return new SimpleObjectProperty<>(cellData.getValue().getChange());
+        });
+        
+        // Set event handlers for report type buttons
+        report_membership.setOnAction(event -> {
+            currentReportType = "Membership";
+            updateReportTypeUI();
+        });
+        
+        report_financial.setOnAction(event -> {
+            currentReportType = "Financial";
+            updateReportTypeUI();
+        });
+        
+        report_equipment.setOnAction(event -> {
+            currentReportType = "Equipment";
+            updateReportTypeUI();
+        });
+        
+        report_schedule.setOnAction(event -> {
+            currentReportType = "Schedule";
+            updateReportTypeUI();
+        });
+        
+        report_coach.setOnAction(event -> {
+            currentReportType = "Coach";
+            updateReportTypeUI();
+        });
+        
+        // Set event handler for generate button
+        report_generate.setOnAction(event -> {
+            generateReport();
+        });
+        
+        // Set event handler for export button
+        report_export.setOnAction(event -> {
+            exportReport();
+        });
+        
+        // Select default report type
+        updateReportTypeUI();
+    }
+    
+    private void updateReportTypeUI() {
+        // Reset all chart visibilities
+        report_trendChart.setVisible(false);
+        report_comparisonChart.setVisible(false);
+        report_distributionChart.setVisible(false);
+        report_detailTable.setVisible(false);
+        
+        // Set appropriate chart visibility based on report type
+        switch (currentReportType) {
+            case "Membership":
+                report_trendChart.setTitle("Membership Trends");
+                report_trendChart.setVisible(true);
+                break;
+                
+            case "Financial":
+                report_trendChart.setTitle("Financial Analysis");
+                report_trendChart.setVisible(true);
+                break;
+                
+            case "Equipment":
+                report_distributionChart.setTitle("Equipment Status Distribution");
+                report_distributionChart.setVisible(true);
+                break;
+                
+            case "Schedule":
+                report_comparisonChart.setTitle("Class Capacity Analysis");
+                report_comparisonChart.setVisible(true);
+                break;
+                
+            case "Coach":
+                report_comparisonChart.setTitle("Coach Workload Analysis");
+                report_comparisonChart.setVisible(true);
+                break;
+        }
+        
+        // Generate the initial report if dates are set
+        if (report_startDate.getValue() != null && report_endDate.getValue() != null) {
+            generateReport();
+        }
+    }
+    
+    private void generateReport() {
+        try {
+            LocalDate startDate = report_startDate.getValue();
+            LocalDate endDate = report_endDate.getValue();
+            String interval = report_interval.getValue();
+            
+            if (startDate == null || endDate == null || interval == null) {
+                Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Message");
+                alert.setHeaderText(null);
+                alert.setContentText("Please select date range and interval.");
+                alert.showAndWait();
+                return;
+            }
+            
+            // Check if start date is before end date
+            if (startDate.isAfter(endDate)) {
+                Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Message");
+                alert.setHeaderText(null);
+                alert.setContentText("Start date must be before end date.");
+                alert.showAndWait();
+                return;
+            }
+            
+            // Reset all charts
+            report_trendChart.getData().clear();
+            report_comparisonChart.getData().clear();
+            report_distributionChart.getData().clear();
+            report_detailTable.getItems().clear();
+            
+            // Generate report based on the selected type
+            switch (currentReportType) {
+                case "Membership":
+                    // Generate trend chart
+                    ObservableList<XYChart.Series<String, Number>> membershipData = 
+                            reportGenerator.generateMembershipTrend(startDate, endDate, interval);
+                    report_trendChart.getData().addAll(membershipData);
+                    
+                    // Generate detailed table data
+                    ObservableList<reportData> membershipDetails = 
+                            reportGenerator.generateDetailedReport("Membership", startDate, endDate);
+                    report_detailTable.setItems(membershipDetails);
+                    report_detailTable.setVisible(true);
+                    break;
+                    
+                case "Financial":
+                    // Generate trend chart
+                    ObservableList<XYChart.Series<String, Number>> financialData = 
+                            reportGenerator.generateFinancialReport(startDate, endDate, interval);
+                    report_trendChart.getData().addAll(financialData);
+                    
+                    // Generate detailed table data
+                    ObservableList<reportData> financialDetails = 
+                            reportGenerator.generateDetailedReport("Financial", startDate, endDate);
+                    report_detailTable.setItems(financialDetails);
+                    report_detailTable.setVisible(true);
+                    break;
+                    
+                case "Equipment":
+                    // Generate pie chart
+                    ObservableList<PieChart.Data> equipmentData = 
+                            reportGenerator.generateEquipmentStatusDistribution();
+                    report_distributionChart.setData(equipmentData);
+                    
+                    // Generate detailed table data
+                    ObservableList<reportData> equipmentDetails = 
+                            reportGenerator.generateDetailedReport("Equipment", startDate, endDate);
+                    report_detailTable.setItems(equipmentDetails);
+                    report_detailTable.setVisible(true);
+                    break;
+                    
+                case "Schedule":
+                    // Generate bar chart
+                    ObservableList<XYChart.Series<String, Number>> scheduleData = 
+                            reportGenerator.generateScheduleCapacityAnalysis();
+                    report_comparisonChart.getData().addAll(scheduleData);
+                    
+                    // Generate detailed table data
+                    ObservableList<reportData> scheduleDetails = 
+                            reportGenerator.generateDetailedReport("Schedule", startDate, endDate);
+                    report_detailTable.setItems(scheduleDetails);
+                    report_detailTable.setVisible(true);
+                    break;
+                    
+                case "Coach":
+                    // Generate bar chart
+                    ObservableList<XYChart.Series<String, Number>> coachData = 
+                            reportGenerator.generateCoachWorkload();
+                    report_comparisonChart.getData().addAll(coachData);
+                    
+                    // Generate detailed table data
+                    ObservableList<reportData> coachDetails = 
+                            reportGenerator.generateDetailedReport("Coach", startDate, endDate);
+                    report_detailTable.setItems(coachDetails);
+                    report_detailTable.setVisible(true);
+                    break;
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Error Message");
+            alert.setHeaderText(null);
+            alert.setContentText("Error generating report: " + e.getMessage());
+            alert.showAndWait();
+        }
+    }
+    
+    private void exportReport() {
+        try {
+            if (report_startDate.getValue() == null || report_endDate.getValue() == null) {
+                Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Message");
+                alert.setHeaderText(null);
+                alert.setContentText("Please generate a report first.");
+                alert.showAndWait();
+                return;
+            }
+            
+            LocalDate startDate = report_startDate.getValue();
+            LocalDate endDate = report_endDate.getValue();
+            
+            // Get the report data from the table
+            ObservableList<reportData> reportDataList = report_detailTable.getItems();
+            
+            if (reportDataList.isEmpty()) {
+                Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Message");
+                alert.setHeaderText(null);
+                alert.setContentText("No data to export. Please generate a report with data first.");
+                alert.showAndWait();
+                return;
+            }
+            
+            // Show in-progress message
+            Alert progressAlert = new Alert(AlertType.INFORMATION);
+            progressAlert.setTitle("Export Information");
+            progressAlert.setHeaderText(null);
+            progressAlert.setContentText("Exporting report...");
+            progressAlert.show();
+            
+            // Export the data
+            String exportedFilePath = reportExporter.exportToCSV(
+                currentReportType, 
+                reportDataList,
+                startDate,
+                endDate
+            );
+            
+            // Close the progress alert
+            progressAlert.close();
+            
+            // Show success message
+            Alert successAlert = new Alert(AlertType.INFORMATION);
+            successAlert.setTitle("Export Success");
+            successAlert.setHeaderText(null);
+            successAlert.setContentText("Report successfully exported to:\n" + exportedFilePath);
+            successAlert.showAndWait();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Error Message");
+            alert.setHeaderText(null);
+            alert.setContentText("Error exporting report: " + e.getMessage());
+            alert.showAndWait();
         }
     }
 
@@ -1839,15 +2115,14 @@ public class dashboardController implements Initializable {
         scheduleStatusList();
         scheduleCoachList();
         scheduleShowData();
-
+        
         // Add mouse click event handler for schedule table
         schedule_tableView.setOnMouseClicked((MouseEvent event) -> {
             scheduleSelect();
         });
-        
+
         // Initialize reports functionality
         initializeReportIntervals();
-
     }
 
     // Schedule Management Methods
